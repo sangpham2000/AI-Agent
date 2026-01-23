@@ -1,0 +1,794 @@
+{
+  "nodes": [
+    {
+      "id": "recursiveCharacterTextSplitter_0",
+      "position": {
+        "x": 84.21635791277856,
+        "y": -295.94649423887165
+      },
+      "type": "customNode",
+      "data": {
+        "id": "recursiveCharacterTextSplitter_0",
+        "label": "Recursive Character Text Splitter",
+        "version": 2,
+        "name": "recursiveCharacterTextSplitter",
+        "type": "RecursiveCharacterTextSplitter",
+        "baseClasses": [
+          "RecursiveCharacterTextSplitter",
+          "TextSplitter",
+          "BaseDocumentTransformer",
+          "Runnable"
+        ],
+        "category": "Text Splitters",
+        "description": "Split documents recursively by different characters - starting with \"\\n\\n\", then \"\\n\", then \" \"",
+        "inputParams": [
+          {
+            "label": "Chunk Size",
+            "name": "chunkSize",
+            "type": "number",
+            "description": "Number of characters in each chunk. Default is 1000.",
+            "default": 1000,
+            "optional": true,
+            "id": "recursiveCharacterTextSplitter_0-input-chunkSize-number",
+            "display": true
+          },
+          {
+            "label": "Chunk Overlap",
+            "name": "chunkOverlap",
+            "type": "number",
+            "description": "Number of characters to overlap between chunks. Default is 200.",
+            "default": 200,
+            "optional": true,
+            "id": "recursiveCharacterTextSplitter_0-input-chunkOverlap-number",
+            "display": true
+          },
+          {
+            "label": "Custom Separators",
+            "name": "separators",
+            "type": "string",
+            "rows": 4,
+            "description": "Array of custom separators to determine when to split the text, will override the default separators",
+            "placeholder": "[\"|\", \"##\", \">\", \"-\"]",
+            "additionalParams": true,
+            "optional": true,
+            "id": "recursiveCharacterTextSplitter_0-input-separators-string",
+            "display": true
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "chunkSize": 1000,
+          "chunkOverlap": 200,
+          "separators": ""
+        },
+        "outputAnchors": [
+          {
+            "id": "recursiveCharacterTextSplitter_0-output-recursiveCharacterTextSplitter-RecursiveCharacterTextSplitter|TextSplitter|BaseDocumentTransformer|Runnable",
+            "name": "recursiveCharacterTextSplitter",
+            "label": "RecursiveCharacterTextSplitter",
+            "description": "Split documents recursively by different characters - starting with \"\\n\\n\", then \"\\n\", then \" \"",
+            "type": "RecursiveCharacterTextSplitter | TextSplitter | BaseDocumentTransformer | Runnable"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      },
+      "width": 300,
+      "height": 436,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 84.21635791277856,
+        "y": -295.94649423887165
+      },
+      "dragging": false
+    },
+    {
+      "id": "googleGenerativeAiEmbeddings_0",
+      "position": {
+        "x": 421.0963808908632,
+        "y": -103.98080873318747
+      },
+      "type": "customNode",
+      "data": {
+        "id": "googleGenerativeAiEmbeddings_0",
+        "label": "GoogleGenerativeAI Embeddings",
+        "version": 2,
+        "name": "googleGenerativeAiEmbeddings",
+        "type": "GoogleGenerativeAiEmbeddings",
+        "baseClasses": [
+          "GoogleGenerativeAiEmbeddings",
+          "GoogleGenerativeAIEmbeddings",
+          "Embeddings"
+        ],
+        "category": "Embeddings",
+        "description": "Google Generative API to generate embeddings for a given text",
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": [
+              "googleGenerativeAI"
+            ],
+            "optional": false,
+            "description": "Google Generative AI credential.",
+            "id": "googleGenerativeAiEmbeddings_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Model Name",
+            "name": "modelName",
+            "type": "asyncOptions",
+            "loadMethod": "listModels",
+            "default": "embedding-001",
+            "id": "googleGenerativeAiEmbeddings_0-input-modelName-asyncOptions",
+            "display": true
+          },
+          {
+            "label": "Task Type",
+            "name": "tasktype",
+            "type": "options",
+            "description": "Type of task for which the embedding will be used",
+            "options": [
+              {
+                "label": "TASK_TYPE_UNSPECIFIED",
+                "name": "TASK_TYPE_UNSPECIFIED"
+              },
+              {
+                "label": "RETRIEVAL_QUERY",
+                "name": "RETRIEVAL_QUERY"
+              },
+              {
+                "label": "RETRIEVAL_DOCUMENT",
+                "name": "RETRIEVAL_DOCUMENT"
+              },
+              {
+                "label": "SEMANTIC_SIMILARITY",
+                "name": "SEMANTIC_SIMILARITY"
+              },
+              {
+                "label": "CLASSIFICATION",
+                "name": "CLASSIFICATION"
+              },
+              {
+                "label": "CLUSTERING",
+                "name": "CLUSTERING"
+              }
+            ],
+            "default": "TASK_TYPE_UNSPECIFIED",
+            "id": "googleGenerativeAiEmbeddings_0-input-tasktype-options",
+            "display": true
+          },
+          {
+            "label": "Strip New Lines",
+            "name": "stripNewLines",
+            "type": "boolean",
+            "optional": true,
+            "additionalParams": true,
+            "description": "Remove new lines from input text before embedding to reduce token count",
+            "id": "googleGenerativeAiEmbeddings_0-input-stripNewLines-boolean",
+            "display": true
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "modelName": "text-embedding-004",
+          "tasktype": "TASK_TYPE_UNSPECIFIED",
+          "stripNewLines": ""
+        },
+        "outputAnchors": [
+          {
+            "id": "googleGenerativeAiEmbeddings_0-output-googleGenerativeAiEmbeddings-GoogleGenerativeAiEmbeddings|GoogleGenerativeAIEmbeddings|Embeddings",
+            "name": "googleGenerativeAiEmbeddings",
+            "label": "GoogleGenerativeAiEmbeddings",
+            "description": "Google Generative API to generate embeddings for a given text",
+            "type": "GoogleGenerativeAiEmbeddings | GoogleGenerativeAIEmbeddings | Embeddings"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      },
+      "width": 300,
+      "height": 526,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 421.0963808908632,
+        "y": -103.98080873318747
+      },
+      "dragging": false
+    },
+    {
+      "id": "postgres_0",
+      "position": {
+        "x": 765.6575582509905,
+        "y": -298.6452675880333
+      },
+      "type": "customNode",
+      "data": {
+        "id": "postgres_0",
+        "label": "Postgres",
+        "version": 7,
+        "name": "postgres",
+        "type": "Postgres",
+        "baseClasses": [
+          "Postgres",
+          "VectorStoreRetriever",
+          "BaseRetriever"
+        ],
+        "category": "Vector Stores",
+        "description": "Upsert embedded data and perform similarity search upon query using pgvector on Postgres",
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": [
+              "PostgresApi"
+            ],
+            "optional": false,
+            "id": "postgres_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Host",
+            "name": "host",
+            "type": "string",
+            "optional": false,
+            "id": "postgres_0-input-host-string",
+            "display": true
+          },
+          {
+            "label": "Database",
+            "name": "database",
+            "type": "string",
+            "optional": false,
+            "id": "postgres_0-input-database-string",
+            "display": true
+          },
+          {
+            "label": "Port",
+            "name": "port",
+            "type": "number",
+            "placeholder": "5432",
+            "optional": true,
+            "id": "postgres_0-input-port-number",
+            "display": true
+          },
+          {
+            "label": "SSL",
+            "name": "ssl",
+            "description": "Use SSL to connect to Postgres",
+            "type": "boolean",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-ssl-boolean",
+            "display": true
+          },
+          {
+            "label": "Table Name",
+            "name": "tableName",
+            "type": "string",
+            "placeholder": "documents",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-tableName-string",
+            "display": true
+          },
+          {
+            "label": "Distance Strategy",
+            "name": "distanceStrategy",
+            "description": "Strategy for calculating distances between vectors",
+            "type": "options",
+            "options": [
+              {
+                "label": "Cosine",
+                "name": "cosine"
+              },
+              {
+                "label": "Euclidean",
+                "name": "euclidean"
+              },
+              {
+                "label": "Inner Product",
+                "name": "innerProduct"
+              }
+            ],
+            "additionalParams": true,
+            "default": "cosine",
+            "optional": true,
+            "id": "postgres_0-input-distanceStrategy-options",
+            "display": true
+          },
+          {
+            "label": "File Upload",
+            "name": "fileUpload",
+            "description": "Allow file upload on the chat",
+            "hint": {
+              "label": "How to use",
+              "value": "\n**File Upload**\n\nThis allows file upload on the chat. Uploaded files will be upserted on the fly to the vector store.\n\n**Note:**\n- You can only turn on file upload for one vector store at a time.\n- At least one Document Loader node should be connected to the document input.\n- Document Loader should be file types like PDF, DOCX, TXT, etc.\n\n**How it works**\n- Uploaded files will have the metadata updated with the chatId.\n- This will allow the file to be associated with the chatId.\n- When querying, metadata will be filtered by chatId to retrieve files associated with the chatId.\n"
+            },
+            "type": "boolean",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-fileUpload-boolean",
+            "display": true
+          },
+          {
+            "label": "Additional Configuration",
+            "name": "additionalConfig",
+            "type": "json",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-additionalConfig-json",
+            "display": true
+          },
+          {
+            "label": "Top K",
+            "name": "topK",
+            "description": "Number of top results to fetch. Default to 4",
+            "placeholder": "4",
+            "type": "number",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-topK-number",
+            "display": true
+          },
+          {
+            "label": "Postgres Metadata Filter",
+            "name": "pgMetadataFilter",
+            "type": "json",
+            "additionalParams": true,
+            "optional": true,
+            "acceptVariable": true,
+            "id": "postgres_0-input-pgMetadataFilter-json",
+            "display": true
+          },
+          {
+            "label": "Content Column Name",
+            "name": "contentColumnName",
+            "description": "Column name to store the text content (PGVector Driver only, others use pageContent)",
+            "type": "string",
+            "placeholder": "pageContent",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgres_0-input-contentColumnName-string",
+            "display": true
+          }
+        ],
+        "inputAnchors": [
+          {
+            "label": "Document",
+            "name": "document",
+            "type": "Document",
+            "list": true,
+            "optional": true,
+            "id": "postgres_0-input-document-Document",
+            "display": true
+          },
+          {
+            "label": "Embeddings",
+            "name": "embeddings",
+            "type": "Embeddings",
+            "id": "postgres_0-input-embeddings-Embeddings",
+            "display": true
+          },
+          {
+            "label": "Record Manager",
+            "name": "recordManager",
+            "type": "RecordManager",
+            "description": "Keep track of the record to prevent duplication",
+            "optional": true,
+            "id": "postgres_0-input-recordManager-RecordManager",
+            "display": true
+          }
+        ],
+        "inputs": {
+          "document": [
+            "{{fileLoader_0.data.instance}}"
+          ],
+          "embeddings": "{{googleGenerativeAiEmbeddings_0.data.instance}}",
+          "recordManager": "{{postgresRecordManager_0.data.instance}}",
+          "host": "postgres",
+          "database": "ai_agent_db",
+          "port": "5432",
+          "ssl": "",
+          "tableName": "documents",
+          "distanceStrategy": "cosine",
+          "fileUpload": true,
+          "additionalConfig": "",
+          "topK": "",
+          "pgMetadataFilter": "",
+          "contentColumnName": ""
+        },
+        "outputAnchors": [
+          {
+            "name": "output",
+            "label": "Output",
+            "type": "options",
+            "description": "",
+            "options": [
+              {
+                "id": "postgres_0-output-retriever-Postgres|VectorStoreRetriever|BaseRetriever",
+                "name": "retriever",
+                "label": "Postgres Retriever",
+                "description": "",
+                "type": "Postgres | VectorStoreRetriever | BaseRetriever"
+              },
+              {
+                "id": "postgres_0-output-vectorStore-Postgres|VectorStore",
+                "name": "vectorStore",
+                "label": "Postgres Vector Store",
+                "description": "",
+                "type": "Postgres | VectorStore"
+              }
+            ],
+            "default": "retriever"
+          }
+        ],
+        "outputs": {
+          "output": "retriever"
+        },
+        "selected": false
+      },
+      "width": 300,
+      "height": 809,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 765.6575582509905,
+        "y": -298.6452675880333
+      }
+    },
+    {
+      "id": "postgresRecordManager_0",
+      "position": {
+        "x": 423.4425721492895,
+        "y": 427.84330725555617
+      },
+      "type": "customNode",
+      "data": {
+        "id": "postgresRecordManager_0",
+        "label": "Postgres Record Manager",
+        "version": 1,
+        "name": "postgresRecordManager",
+        "type": "Postgres RecordManager",
+        "baseClasses": [
+          "Postgres RecordManager",
+          "RecordManager"
+        ],
+        "category": "Record Manager",
+        "description": "Use Postgres to keep track of document writes into the vector databases",
+        "inputParams": [
+          {
+            "label": "Connect Credential",
+            "name": "credential",
+            "type": "credential",
+            "credentialNames": [
+              "PostgresApi"
+            ],
+            "optional": false,
+            "id": "postgresRecordManager_0-input-credential-credential",
+            "display": true
+          },
+          {
+            "label": "Host",
+            "name": "host",
+            "type": "string",
+            "optional": false,
+            "id": "postgresRecordManager_0-input-host-string",
+            "display": true
+          },
+          {
+            "label": "Database",
+            "name": "database",
+            "type": "string",
+            "optional": false,
+            "id": "postgresRecordManager_0-input-database-string",
+            "display": true
+          },
+          {
+            "label": "Port",
+            "name": "port",
+            "type": "number",
+            "placeholder": "5432",
+            "optional": true,
+            "id": "postgresRecordManager_0-input-port-number",
+            "display": true
+          },
+          {
+            "label": "SSL",
+            "name": "ssl",
+            "description": "Use SSL to connect to Postgres",
+            "type": "boolean",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgresRecordManager_0-input-ssl-boolean",
+            "display": true
+          },
+          {
+            "label": "Additional Connection Configuration",
+            "name": "additionalConfig",
+            "type": "json",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgresRecordManager_0-input-additionalConfig-json",
+            "display": true
+          },
+          {
+            "label": "Table Name",
+            "name": "tableName",
+            "type": "string",
+            "placeholder": "upsertion_records",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgresRecordManager_0-input-tableName-string",
+            "display": true
+          },
+          {
+            "label": "Namespace",
+            "name": "namespace",
+            "type": "string",
+            "description": "If not specified, chatflowid will be used",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgresRecordManager_0-input-namespace-string",
+            "display": true
+          },
+          {
+            "label": "Cleanup",
+            "name": "cleanup",
+            "type": "options",
+            "description": "Read more on the difference between different cleanup methods <a target=\"_blank\" href=\"https://js.langchain.com/docs/modules/data_connection/indexing/#deletion-modes\">here</a>",
+            "options": [
+              {
+                "label": "None",
+                "name": "none",
+                "description": "No clean up of old content"
+              },
+              {
+                "label": "Incremental",
+                "name": "incremental",
+                "description": "Delete previous versions of the content if content of the source document has changed. Important!! SourceId Key must be specified and document metadata must contains the specified key"
+              },
+              {
+                "label": "Full",
+                "name": "full",
+                "description": "Same as incremental, but if the source document has been deleted, it will be deleted from vector store as well, incremental mode will not."
+              }
+            ],
+            "additionalParams": true,
+            "default": "none",
+            "id": "postgresRecordManager_0-input-cleanup-options",
+            "display": true
+          },
+          {
+            "label": "SourceId Key",
+            "name": "sourceIdKey",
+            "type": "string",
+            "description": "Key used to get the true source of document, to be compared against the record. Document metadata must contains SourceId Key",
+            "default": "source",
+            "placeholder": "source",
+            "additionalParams": true,
+            "optional": true,
+            "id": "postgresRecordManager_0-input-sourceIdKey-string",
+            "display": true
+          }
+        ],
+        "inputAnchors": [],
+        "inputs": {
+          "host": "postgres",
+          "database": "ai_agent_db",
+          "port": "5432",
+          "ssl": "",
+          "additionalConfig": "",
+          "tableName": "upsertion_records",
+          "namespace": "",
+          "cleanup": "incremental",
+          "sourceIdKey": "source"
+        },
+        "outputAnchors": [
+          {
+            "id": "postgresRecordManager_0-output-postgresRecordManager-Postgres RecordManager|RecordManager",
+            "name": "postgresRecordManager",
+            "label": "Postgres RecordManager",
+            "description": "Use Postgres to keep track of document writes into the vector databases",
+            "type": "Postgres RecordManager | RecordManager"
+          }
+        ],
+        "outputs": {},
+        "selected": false
+      },
+      "width": 300,
+      "height": 631,
+      "selected": false,
+      "dragging": false,
+      "positionAbsolute": {
+        "x": 423.4425721492895,
+        "y": 427.84330725555617
+      }
+    },
+    {
+      "id": "fileLoader_0",
+      "position": {
+        "x": 422.1488686135616,
+        "y": -555.8586993135903
+      },
+      "type": "customNode",
+      "data": {
+        "id": "fileLoader_0",
+        "label": "File Loader",
+        "version": 2,
+        "name": "fileLoader",
+        "type": "Document",
+        "baseClasses": [
+          "Document"
+        ],
+        "category": "Document Loaders",
+        "description": "A generic file loader that can load different file types",
+        "inputParams": [
+          {
+            "label": "File",
+            "name": "file",
+            "type": "file",
+            "fileType": "*",
+            "id": "fileLoader_0-input-file-file",
+            "display": true
+          },
+          {
+            "label": "Pdf Usage",
+            "name": "usage",
+            "type": "options",
+            "description": "Only when loading PDF files",
+            "options": [
+              {
+                "label": "One document per page",
+                "name": "perPage"
+              },
+              {
+                "label": "One document per file",
+                "name": "perFile"
+              }
+            ],
+            "default": "perPage",
+            "optional": true,
+            "additionalParams": true,
+            "id": "fileLoader_0-input-usage-options",
+            "display": true
+          },
+          {
+            "label": "Use Legacy Build",
+            "name": "legacyBuild",
+            "type": "boolean",
+            "description": "Use legacy build for PDF compatibility issues",
+            "optional": true,
+            "additionalParams": true,
+            "id": "fileLoader_0-input-legacyBuild-boolean",
+            "display": true
+          },
+          {
+            "label": "JSONL Pointer Extraction",
+            "name": "pointerName",
+            "type": "string",
+            "description": "Only when loading JSONL files",
+            "placeholder": "<pointerName>",
+            "optional": true,
+            "additionalParams": true,
+            "id": "fileLoader_0-input-pointerName-string",
+            "display": true
+          },
+          {
+            "label": "Additional Metadata",
+            "name": "metadata",
+            "type": "json",
+            "description": "Additional metadata to be added to the extracted documents",
+            "optional": true,
+            "additionalParams": true,
+            "id": "fileLoader_0-input-metadata-json",
+            "display": true
+          },
+          {
+            "label": "Omit Metadata Keys",
+            "name": "omitMetadataKeys",
+            "type": "string",
+            "rows": 4,
+            "description": "Each document loader comes with a default set of metadata keys that are extracted from the document. You can use this field to omit some of the default metadata keys. The value should be a list of keys, seperated by comma. Use * to omit all metadata keys execept the ones you specify in the Additional Metadata field",
+            "placeholder": "key1, key2, key3.nestedKey1",
+            "optional": true,
+            "additionalParams": true,
+            "id": "fileLoader_0-input-omitMetadataKeys-string",
+            "display": true
+          }
+        ],
+        "inputAnchors": [
+          {
+            "label": "Text Splitter",
+            "name": "textSplitter",
+            "type": "TextSplitter",
+            "optional": true,
+            "id": "fileLoader_0-input-textSplitter-TextSplitter",
+            "display": true
+          }
+        ],
+        "inputs": {
+          "textSplitter": "{{recursiveCharacterTextSplitter_0.data.instance}}",
+          "usage": "perPage",
+          "legacyBuild": "",
+          "pointerName": "",
+          "metadata": "",
+          "omitMetadataKeys": ""
+        },
+        "outputAnchors": [
+          {
+            "name": "output",
+            "label": "Output",
+            "type": "options",
+            "description": "Array of document objects containing metadata and pageContent",
+            "options": [
+              {
+                "id": "fileLoader_0-output-document-Document|json",
+                "name": "document",
+                "label": "Document",
+                "description": "Array of document objects containing metadata and pageContent",
+                "type": "Document | json"
+              },
+              {
+                "id": "fileLoader_0-output-text-string|json",
+                "name": "text",
+                "label": "Text",
+                "description": "Concatenated string from pageContent of documents",
+                "type": "string | json"
+              }
+            ],
+            "default": "document"
+          }
+        ],
+        "outputs": {
+          "output": "document"
+        },
+        "selected": false
+      },
+      "width": 300,
+      "height": 446,
+      "selected": false,
+      "positionAbsolute": {
+        "x": 422.1488686135616,
+        "y": -555.8586993135903
+      },
+      "dragging": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "googleGenerativeAiEmbeddings_0",
+      "sourceHandle": "googleGenerativeAiEmbeddings_0-output-googleGenerativeAiEmbeddings-GoogleGenerativeAiEmbeddings|GoogleGenerativeAIEmbeddings|Embeddings",
+      "target": "postgres_0",
+      "targetHandle": "postgres_0-input-embeddings-Embeddings",
+      "type": "buttonedge",
+      "id": "googleGenerativeAiEmbeddings_0-googleGenerativeAiEmbeddings_0-output-googleGenerativeAiEmbeddings-GoogleGenerativeAiEmbeddings|GoogleGenerativeAIEmbeddings|Embeddings-postgres_0-postgres_0-input-embeddings-Embeddings"
+    },
+    {
+      "source": "recursiveCharacterTextSplitter_0",
+      "sourceHandle": "recursiveCharacterTextSplitter_0-output-recursiveCharacterTextSplitter-RecursiveCharacterTextSplitter|TextSplitter|BaseDocumentTransformer|Runnable",
+      "target": "fileLoader_0",
+      "targetHandle": "fileLoader_0-input-textSplitter-TextSplitter",
+      "type": "buttonedge",
+      "id": "recursiveCharacterTextSplitter_0-recursiveCharacterTextSplitter_0-output-recursiveCharacterTextSplitter-RecursiveCharacterTextSplitter|TextSplitter|BaseDocumentTransformer|Runnable-fileLoader_0-fileLoader_0-input-textSplitter-TextSplitter"
+    },
+    {
+      "source": "fileLoader_0",
+      "sourceHandle": "fileLoader_0-output-document-Document|json",
+      "target": "postgres_0",
+      "targetHandle": "postgres_0-input-document-Document",
+      "type": "buttonedge",
+      "id": "fileLoader_0-fileLoader_0-output-document-Document|json-postgres_0-postgres_0-input-document-Document"
+    },
+    {
+      "source": "postgresRecordManager_0",
+      "sourceHandle": "postgresRecordManager_0-output-postgresRecordManager-Postgres RecordManager|RecordManager",
+      "target": "postgres_0",
+      "targetHandle": "postgres_0-input-recordManager-RecordManager",
+      "type": "buttonedge",
+      "id": "postgresRecordManager_0-postgresRecordManager_0-output-postgresRecordManager-Postgres RecordManager|RecordManager-postgres_0-postgres_0-input-recordManager-RecordManager"
+    }
+  ]
+}
