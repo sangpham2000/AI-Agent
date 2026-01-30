@@ -75,4 +75,19 @@ public class UsersController : ControllerBase
         await _mediator.Send(new DeleteUserCommand(id));
         return NoContent();
     }
+
+    [HttpPost("{id}/roles")]
+    public async Task<IActionResult> AssignRole(Guid id, [FromBody] string roleName)
+    {
+        var success = await _mediator.Send(new AssignRoleCommand(id, roleName));
+        if (!success) return NotFound();
+        return NoContent();
+    }
+
+    [HttpGet("{id}/permissions")]
+    public async Task<ActionResult<UserPermissionsDto>> GetPermissions(Guid id)
+    {
+        var result = await _mediator.Send(new GetMyPermissionsQuery(id));
+        return Ok(result);
+    }
 }

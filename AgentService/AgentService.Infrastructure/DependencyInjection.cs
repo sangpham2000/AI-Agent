@@ -31,6 +31,8 @@ public static class DependencyInjection
 
         services.AddScoped<IUserQueryService, UserQueryService>();
         services.AddScoped<IUserWriteRepository, UserWriteRepository>();
+        services.AddScoped<IRoleQueryService, RoleQueryService>();
+        services.AddScoped<IRoleWriteRepository, RoleWriteRepository>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(
             typeof(AgentService.Application.UseCases.Chat.GetConversationQueryHandler).Assembly,
@@ -58,6 +60,9 @@ public static class DependencyInjection
                 client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
             }
         });
+
+        // Keycloak Admin Service
+        services.AddHttpClient<IKeycloakAdminService, KeycloakAdminService>();
 
         // Telegram Bot
         var botToken = configuration["Telegram:BotToken"];

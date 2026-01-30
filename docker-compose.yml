@@ -68,80 +68,80 @@ services:
   # BACKEND SERVICES
   # =============================================================================
   
-  agent-service:
-    build:
-      context: ./AgentService
-      dockerfile: Dockerfile
-    container_name: ai-agent-service
-    restart: unless-stopped
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-ai_agent_db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres123}
-      # Flowise Integration
-      - Flowise__BaseUrl=http://flowise:3000
-      - Flowise__ApiKey=${FLOWISE_API_KEY:-}
-      # Telegram Bot Configuration
-      - Telegram__BotToken=${TELEGRAM_BOT_TOKEN:-}
-      - Telegram__WebhookUrl=${TELEGRAM_WEBHOOK_URL:-}
-      # JWT Configuration
-      - Jwt__Secret=${JWT_SECRET:-your-super-secret-jwt-key-here-min-32-chars}
-      - Jwt__Issuer=${JWT_ISSUER:-ai-agent-api}
-      - Jwt__Audience=${JWT_AUDIENCE:-ai-agent-clients}
-    ports:
-      - "${CORE_SERVICE_PORT:-5001}:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      flowise:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - ai-agent-network
+  # agent-service:
+  #   build:
+  #     context: ./AgentService
+  #     dockerfile: Dockerfile
+  #   container_name: ai-agent-service
+  #   restart: unless-stopped
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #     - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-ai_agent_db};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres123}
+  #     # Flowise Integration
+  #     - Flowise__BaseUrl=http://flowise:3000
+  #     - Flowise__ApiKey=${FLOWISE_API_KEY:-}
+  #     # Telegram Bot Configuration
+  #     - Telegram__BotToken=${TELEGRAM_BOT_TOKEN:-}
+  #     - Telegram__WebhookUrl=${TELEGRAM_WEBHOOK_URL:-}
+  #     # JWT Configuration
+  #     - Jwt__Secret=${JWT_SECRET:-your-super-secret-jwt-key-here-min-32-chars}
+  #     - Jwt__Issuer=${JWT_ISSUER:-ai-agent-api}
+  #     - Jwt__Audience=${JWT_AUDIENCE:-ai-agent-clients}
+  #   ports:
+  #     - "${CORE_SERVICE_PORT:-5001}:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     flowise:
+  #       condition: service_healthy
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 10s
+  #   networks:
+  #     - ai-agent-network
 
   # =============================================================================
   # FRONTEND SERVICES
   # =============================================================================
   
-  dashboard:
-    build:
-      context: ./Agent-dashboard
-      dockerfile: Dockerfile
-    container_name: ai-agent-dashboard
-    restart: unless-stopped
-    ports:
-      - "${DASHBOARD_PORT:-8080}:80"
-    depends_on:
-      - agent-service
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - ai-agent-network
+  # dashboard:
+  #   build:
+  #     context: ./Agent-dashboard
+  #     dockerfile: Dockerfile
+  #   container_name: ai-agent-dashboard
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${DASHBOARD_PORT:-8080}:80"
+  #   depends_on:
+  #     - agent-service
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   networks:
+  #     - ai-agent-network
 
-  plugin:
-    build:
-      context: ./Agent-plugin
-      dockerfile: Dockerfile
-    container_name: ai-agent-plugin
-    restart: unless-stopped
-    ports:
-      - "${PLUGIN_PORT:-8081}:80"
-    depends_on:
-      - agent-service
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - ai-agent-network
+  # plugin:
+  #   build:
+  #     context: ./Agent-plugin
+  #     dockerfile: Dockerfile
+  #   container_name: ai-agent-plugin
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${PLUGIN_PORT:-8081}:80"
+  #   depends_on:
+  #     - agent-service
+  #   healthcheck:
+  #     test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   networks:
+  #     - ai-agent-network
 
 # =============================================================================
 # NETWORKS

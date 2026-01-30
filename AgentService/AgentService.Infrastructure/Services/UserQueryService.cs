@@ -19,7 +19,20 @@ public class UserQueryService : IUserQueryService
     {
         return await _context.Users
             .AsNoTracking()
-            .ProjectToType<UserDto>()
+            .Select(u => new UserDto(
+                u.Id,
+                u.Username,
+                u.Email,
+                u.FirstName,
+                u.LastName,
+                u.PhoneNumber,
+                u.DateOfBirth,
+                u.AvatarUrl,
+                u.IsActive,
+                u.LastLoginAt,
+                u.CreatedAt,
+                u.UserRoles.Select(ur => ur.Role.Name).ToList()
+            ))
             .ToListAsync();
     }
 
@@ -28,7 +41,20 @@ public class UserQueryService : IUserQueryService
         return await _context.Users
             .AsNoTracking()
             .Where(u => u.Id == id)
-            .ProjectToType<UserDto>()
+            .Select(u => new UserDto(
+                u.Id,
+                u.Username,
+                u.Email,
+                u.FirstName,
+                u.LastName,
+                u.PhoneNumber,
+                u.DateOfBirth,
+                u.AvatarUrl,
+                u.IsActive,
+                u.LastLoginAt,
+                u.CreatedAt,
+                u.UserRoles.Select(ur => ur.Role.Name).ToList()
+            ))
             .FirstOrDefaultAsync();
     }
 }

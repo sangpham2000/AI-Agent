@@ -51,12 +51,11 @@ public class ApplicationDbContext : DbContext
         
         // RolePermission - composite key & relationship fix
         modelBuilder.Entity<RolePermission>(entity => {
-             entity.HasKey(rp => new { rp.RoleId, rp.PermissionCode });
+             entity.HasKey(rp => new { rp.RoleId, rp.PermissionId });
              
              entity.HasOne(rp => rp.Permission)
                    .WithMany()
-                   .HasForeignKey(rp => rp.PermissionCode)
-                   .HasPrincipalKey(p => p.Code);
+                   .HasForeignKey(rp => rp.PermissionId);
         });
 
         // Conversation

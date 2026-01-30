@@ -3,6 +3,8 @@ using AgentService.Domain.Entities;
 using AgentService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
+using AgentService.Domain.Entities.Auth;
+
 namespace AgentService.Infrastructure.Repositories;
 
 public class UserWriteRepository : IUserWriteRepository
@@ -16,7 +18,21 @@ public class UserWriteRepository : IUserWriteRepository
 
     public async Task<User?> GetByIdAsync(Guid id)
     {
-        return await _context.Users.FindAsync(id);
+        return await _context.Users
+            .Include(u => u.UserRoles)
+            .ThenInclude(ur => ur.Role)
+            .FirstOrDefaultAsync(u => u.Id == id);
+    }
+
+    public async Task<Role?> GetRoleByNameAsync(string roleName)
+    {
+        return await _context.Roles.FirstOrDefaultAsync(r => r.Name == roleName);
+    }
+
+    public async Task AddRoleAsync(Role role)
+    {
+        await _context.Roles.AddAsync(role);
+        await _context.SaveChangesAsync();
     }
 
     public async Task AddAsync(User user)
