@@ -1,11 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import ChatWidget from './components/ChatWidget.vue'
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
+  <ChatWidget />
 </template>
 
-<style scoped></style>
+<style>
+/* Global resets or important overrides for the widget context can go here */
+</style>

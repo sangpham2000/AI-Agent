@@ -10,23 +10,63 @@ import i18n from './locales'
 
 // PrimeVue styles
 import 'primeicons/primeicons.css'
+import './style.css'
 
-const app = createApp(App)
+import { sdk } from '@/sdk/AgentSDK'
 
-// Plugins
-app.use(createPinia())
-app.use(router)
-app.use(i18n)
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: {
-      prefix: 'p',
-      darkModeSelector: '.dark-mode',
-      cssLayer: false,
-    },
+const init = (
+  options: {
+    apiKey: string
+    apiUrl?: string
+    theme?: 'light' | 'dark' | 'auto'
+    containerId?: string
+  } = {
+    apiKey: '',
   },
-})
-app.use(ToastService)
+) => {
+  const containerId = options.containerId || 'ai-agent-widget-container'
+  let container = document.getElementById(containerId)
 
-app.mount('#app')
+  if (!container) {
+    container = document.createElement('div')
+    container.id = containerId
+    document.body.appendChild(container)
+  }
+
+  // Initialize SDK
+  sdk.init(options)
+
+  const app = createApp(App)
+
+  app.use(createPinia())
+  app.use(router)
+  app.use(i18n)
+  app.use(PrimeVue, {
+    theme: {
+      preset: Aura,
+      options: {
+        prefix: 'p',
+        darkModeSelector: options.theme === 'dark' ? 'html' : '.dark-mode',
+        cssLayer: false,
+      },
+    },
+  })
+  app.use(ToastService)
+
+  app.provide('widgetOptions', options)
+
+  app.mount(container)
+}
+
+// Expose SDK to window for programmatic control
+const AIAgent = {
+  init,
+  open: () => sdk.open(),
+  close: () => sdk.close(),
+  toggle: () => sdk.toggle(),
+  sendMessage: (msg: string) => sdk.sendMessage(msg),
+  on: (event: string, cb: any) => sdk.on(event, cb),
+  off: (event: string, cb: any) => sdk.off(event, cb),
+}
+
+;(window as any).AIAgent = AIAgent

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent SDK Test</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f3f4f6;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .controls {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 8px 16px;
+        cursor: pointer;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #logs {
+        margin-top: 20px;
+        padding: 10px;
+        background: #282c34;
+        color: #abb2bf;
+        border-radius: 4px;
+        height: 150px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+    </style>
+    <link rel="stylesheet" href="./dist/agent-plugin.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>SDK Architecture Test</h1>
+      <p>
+        Use the buttons below to control the widget programmatically via
+        <code>window.AIAgent</code>.
+      </p>
+
+      <div class="controls">
+        <button onclick="AIAgent.open()">Open</button>
+        <button onclick="AIAgent.close()">Close</button>
+        <button onclick="AIAgent.toggle()">Toggle</button>
+        <button onclick="sendTestMessage()">Send "Hello"</button>
+        <button onclick="document.body.classList.toggle('dark-mode')">Toggle Dark Mode</button>
+      </div>
+
+      <div id="logs">Logs will appear here...</div>
+    </div>
+
+    <script src="./dist/widget.js"></script>
+
+    <script>
+      function log(msg) {
+        const logs = document.getElementById('logs')
+        logs.innerHTML += `<div>> ${msg}</div>`
+        logs.scrollTop = logs.scrollHeight
+      }
+
+      // 1. Initialize
+      window.AIAgent.init({
+        apiKey: 'test-key',
+        theme: 'auto', // Supports 'light', 'dark', 'auto'
+      })
+      log('SDK Initialized')
+
+      // 2. Event Listeners
+      window.AIAgent.on('open', () => log('Event: Widget Opened'))
+      window.AIAgent.on('close', () => log('Event: Widget Closed'))
+      window.AIAgent.on('connected', () => log('Event: SignalR Connected'))
+      window.AIAgent.on('message', (data) =>
+        log(`Event: Message received from ${data.user}: ${data.message.substring(0, 20)}...`),
+      )
+
+      // 3. Methods
+      function sendTestMessage() {
+        window.AIAgent.sendMessage('Hello from SDK button!')
+        log('Sent message via SDK')
+      }
+    </script>
+  </body>
+</html>

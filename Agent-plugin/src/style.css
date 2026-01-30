@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+/* Custom styles for the widget container */
+#ai-agent-widget-container {
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    'Noto Sans',
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    'Noto Color Emoji';
+  line-height: 1.5;
+}
+
+/* DaisyUI v5 Theme Config if needed, or rely on defaults */
+@theme {
+  /* You can override variables here if needed */
+}
