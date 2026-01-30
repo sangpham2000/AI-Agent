@@ -55,6 +55,8 @@ services:
       KC_FEATURES: token-exchange,admin-fine-grained-authz
     ports:
       - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./KeycloakTheme/theme-base/dist_keycloak/keycloak-theme-for-kc-all-other-versions.jar:/opt/keycloak/providers/theme.jar
     depends_on:
       keycloak-db:
         condition: service_healthy
