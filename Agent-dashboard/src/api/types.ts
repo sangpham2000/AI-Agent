@@ -44,6 +44,7 @@ export interface User {
   isActive: boolean
   lastLoginAt?: string
   createdAt: string
+  roles: string[]
 }
 
 export interface CreateUser {
@@ -58,6 +59,27 @@ export interface CreateUser {
 
 export interface UpdateUser extends CreateUser {
   isActive: boolean
+}
+
+export interface Permission {
+  id: string
+  code: string
+  name: string
+  description: string
+  group: string
+}
+
+export interface Role {
+  id: string
+  name: string
+  description: string
+  permissions: Permission[]
+}
+
+export interface UserPermissions {
+  isAdmin: boolean
+  isSuperAdmin: boolean
+  roles: string[]
 }
 
 // Document API Types

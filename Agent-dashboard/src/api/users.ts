@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { User, CreateUser, UpdateUser } from './types'
+import type { User, CreateUser, UpdateUser, UserPermissions, Role, Permission } from './types'
 
 /**
  * Users API endpoints
@@ -15,6 +15,8 @@ export const usersApi = {
    */
   getById: (id: string) => apiClient.get<User>(`/users/${id}`),
 
+  getByEmail: (email: string) => apiClient.get<User>(`/users/by-email/${email}`),
+
   /**
    * Create a new user
    */
@@ -29,6 +31,25 @@ export const usersApi = {
    * Delete a user
    */
   delete: (id: string) => apiClient.delete(`/users/${id}`),
+
+  assignRole(id: string, roleName: string) {
+    return apiClient.post(`/users/${id}/roles`, JSON.stringify(roleName), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+  },
+
+  getPermissions(id: string) {
+    return apiClient.get<UserPermissions>(`/users/${id}/permissions`)
+  },
+}
+
+export const rolesApi = {
+  getAll: () => apiClient.get<Role[]>('/roles'),
+  getPermissions: () => apiClient.get<Permission[]>('/roles/permissions'),
+  updatePermissions: (roleId: string, permissionIds: string[]) =>
+    apiClient.put(`/roles/${roleId}/permissions`, permissionIds),
 }
 
 export default usersApi

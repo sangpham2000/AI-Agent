@@ -100,6 +100,38 @@ export const useUsersStore = defineStore('users', () => {
     }
   }
 
+  async function assignRole(id: string, roleName: string) {
+    isLoading.value = true
+    error.value = null
+    successMessage.value = null
+    try {
+      await usersApi.assignRole(id, roleName)
+      // Update local user state if needed
+      const userIndex = users.value.findIndex((u) => u.id === id)
+      if (userIndex !== -1 && users.value[userIndex]) {
+        const user = users.value[userIndex]!
+        if (!user.roles) user.roles = []
+        if (!user.roles.includes(roleName)) {
+          user.roles.push(roleName)
+        }
+      }
+      if (selectedUser.value && selectedUser.value.id === id) {
+        if (!selectedUser.value.roles) selectedUser.value.roles = []
+        if (!selectedUser.value.roles.includes(roleName)) {
+          selectedUser.value.roles.push(roleName)
+        }
+      }
+
+      successMessage.value = `Role '${roleName}' assigned successfully`
+      return true
+    } catch (e: any) {
+      error.value = e.response?.data?.message || e.message || 'Failed to assign role'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   function clearMessages() {
     error.value = null
     successMessage.value = null
@@ -120,6 +152,7 @@ export const useUsersStore = defineStore('users', () => {
     createUser,
     updateUser,
     deleteUser,
+    assignRole,
     clearMessages,
     setSelectedUser,
   }

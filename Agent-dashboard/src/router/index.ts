@@ -5,32 +5,54 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      component: () => import('@/layouts/LandingLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'landing',
+          component: () => import('@/views/LandingView.vue'),
+        },
+      ],
+    },
+    {
+      path: '/dashboard',
       component: () => import('@/layouts/DashboardLayout.vue'),
       children: [
         {
           path: '',
           name: 'dashboard',
           component: () => import('@/views/DashboardHome.vue'),
+          meta: { requiresAdmin: true },
         },
         {
           path: 'users',
           name: 'users',
           component: () => import('@/views/UsersView.vue'),
+          meta: { requiresAdmin: true },
+        },
+        {
+          path: 'roles',
+          name: 'roles',
+          component: () => import('@/views/RolesView.vue'),
+          meta: { requiresAdmin: true },
         },
         {
           path: 'documents',
           name: 'documents',
           component: () => import('@/views/DocumentsView.vue'),
+          meta: { requiresAdmin: true },
         },
         {
           path: 'analytics',
           name: 'analytics',
           component: () => import('@/views/AnalyticsView.vue'),
+          meta: { requiresAdmin: true },
         },
         {
           path: 'conversations',
           name: 'conversations',
           component: () => import('@/views/ConversationsView.vue'),
+          meta: { requiresAdmin: true },
         },
         {
           path: 'chat',
@@ -63,11 +85,20 @@ router.beforeEach(async (to, from, next) => {
     await authStore.initialize()
   }
 
-  const publicPages = ['/login', '/callback']
+  const publicPages = ['/', '/login', '/callback']
   const authRequired = !publicPages.includes(to.path)
 
   if (authRequired && !authStore.isAuthenticated) {
     next('/login')
+  } else if (to.matched.some((record) => record.meta.requiresAdmin)) {
+    // Check for admin role
+    if (authStore.isAdmin) {
+      next()
+    } else {
+      // Not authorized, redirect to landing or show error
+      // Ideally redirect to a dedicated "Unauthorized" page or stay on landing
+      next('/')
+    }
   } else {
     next()
   }

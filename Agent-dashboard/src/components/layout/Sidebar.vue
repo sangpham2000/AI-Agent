@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -37,33 +37,40 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-const menuGroups: MenuGroup[] = [
+const allMenuGroups: MenuGroup[] = [
   {
     id: 'overview',
     label: 'Overview',
     items: [
-      { name: 'Dashboard', path: '/', icon: 'home' },
-      { name: 'Analytics', path: '/analytics', icon: 'chart' },
+      { name: 'Dashboard', path: '/dashboard', icon: 'home' },
+      { name: 'Analytics', path: '/dashboard/analytics', icon: 'chart' },
     ],
   },
   {
     id: 'management',
     label: 'Management',
     items: [
-      { name: 'Users', path: '/users', icon: 'users' },
-      { name: 'Documents', path: '/documents', icon: 'document' },
-      { name: 'Conversations', path: '/conversations', icon: 'chat' },
+      { name: 'Users', path: '/dashboard/users', icon: 'users' },
+      { name: 'Roles & Permissions', path: '/dashboard/roles', icon: 'lock' },
+      { name: 'Documents', path: '/dashboard/documents', icon: 'document' },
+      { name: 'Conversations', path: '/dashboard/conversations', icon: 'chat' },
     ],
   },
   {
     id: 'tools',
     label: 'Tools',
-    items: [{ name: 'Chat Demo', path: '/chat', icon: 'message', badge: 'Live' }],
+    items: [{ name: 'Chat Demo', path: '/dashboard/chat', icon: 'message', badge: 'Live' }],
   },
 ]
 
+const menuGroups = computed(() => {
+  if (authStore.isAdmin) return allMenuGroups
+  // Non-admin only sees Tools (Chat)
+  return allMenuGroups.filter((g) => g.id === 'tools')
+})
+
 const isActive = (path: string) => {
-  if (path === '/') return route.path === '/'
+  if (path === '/dashboard') return route.path === '/dashboard'
   return route.path.startsWith(path)
 }
 
@@ -79,6 +86,7 @@ const icons: Record<string, string> = {
   chat: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
   message:
     'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z',
+  lock: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
   logout:
     'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1',
 }
@@ -192,7 +200,9 @@ const icons: Record<string, string> = {
         </div>
         <div v-if="!isCollapsed" class="flex-1 min-w-0">
           <p class="text-sm font-medium truncate">{{ authStore.userName || 'Admin' }}</p>
-          <p class="text-[11px] text-base-content/50 truncate">Administrator</p>
+          <p class="text-[11px] text-base-content/50 truncate">
+            {{ authStore.isAdmin ? 'Administrator' : 'User' }}
+          </p>
         </div>
         <button
           v-if="!isCollapsed"

@@ -76,7 +76,7 @@ const recentTasks = [
           />
           Refresh
         </button>
-        <RouterLink to="/analytics" class="btn btn-ghost btn-sm gap-2 rounded-lg">
+        <RouterLink to="dashboard/analytics" class="btn btn-ghost btn-sm gap-2 rounded-lg">
           <AppIcon name="chart-pie" class="w-4 h-4" />
           Get Insights
         </RouterLink>

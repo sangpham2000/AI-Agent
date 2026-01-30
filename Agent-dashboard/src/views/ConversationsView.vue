@@ -242,12 +242,12 @@ function formatDate(dateString: string) {
               <td>
                 <span
                   :class="[
-                    'badge badge-sm',
+                    'badge badge-sm border-0',
                     conv.platform === 'web'
-                      ? 'badge-primary'
+                      ? 'bg-primary/10 text-primary'
                       : conv.platform === 'telegram'
-                        ? 'badge-info'
-                        : 'badge-secondary',
+                        ? 'bg-info/10 text-info'
+                        : 'bg-secondary/10 text-secondary',
                   ]"
                 >
                   {{ conv.platform }}
@@ -257,12 +257,12 @@ function formatDate(dateString: string) {
               <td>
                 <span
                   :class="[
-                    'badge badge-sm',
+                    'badge badge-sm border-0',
                     conv.status === 'completed'
-                      ? 'badge-success'
+                      ? 'bg-success/10 text-success'
                       : conv.status === 'active'
-                        ? 'badge-info'
-                        : 'badge-warning',
+                        ? 'bg-info/10 text-info'
+                        : 'bg-warning/10 text-warning',
                   ]"
                 >
                   {{ conv.status }}

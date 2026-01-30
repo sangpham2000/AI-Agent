@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useUsersStore } from '@/stores/users'
-import type { User, CreateUser, UpdateUser } from '@/api'
+import { rolesApi } from '@/api/users'
+import type { User, CreateUser, UpdateUser, Role } from '@/api/types'
 
 const usersStore = useUsersStore()
 
@@ -9,7 +10,11 @@ const usersStore = useUsersStore()
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showDeleteModal = ref(false)
+const showRoleModal = ref(false)
 const userToDelete = ref<User | null>(null)
+const selectedUserForRole = ref<User | null>(null)
+const roleToAssign = ref('admin')
+const availableRoles = ref<Role[]>([])
 
 // Form state
 const formData = ref<CreateUser>({
@@ -61,8 +66,17 @@ const filteredUsers = computed(() => {
 })
 
 onMounted(async () => {
-  await usersStore.fetchUsers()
+  await Promise.all([usersStore.fetchUsers(), fetchRoles()])
 })
+
+async function fetchRoles() {
+  try {
+    const response = await rolesApi.getAll()
+    availableRoles.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch roles', error)
+  }
+}
 
 // Actions
 function openCreateModal() {
@@ -120,6 +134,21 @@ async function handleDelete() {
   if (result) {
     showDeleteModal.value = false
     userToDelete.value = null
+  }
+}
+
+function openRoleModal(user: User) {
+  selectedUserForRole.value = user
+  roleToAssign.value = '' // Don't pre-select any role
+  showRoleModal.value = true
+}
+
+async function handleAssignRole() {
+  if (!selectedUserForRole.value) return
+  const result = await usersStore.assignRole(selectedUserForRole.value.id, roleToAssign.value)
+  if (result) {
+    showRoleModal.value = false
+    selectedUserForRole.value = null
   }
 }
 
@@ -230,6 +259,7 @@ function formatDate(dateString: string) {
             <tr class="border-base-200">
               <th class="text-xs font-medium text-base-content/50">User</th>
               <th class="text-xs font-medium text-base-content/50">Email</th>
+              <th class="text-xs font-medium text-base-content/50">Roles</th>
               <th class="text-xs font-medium text-base-content/50">Status</th>
               <th class="text-xs font-medium text-base-content/50">Created</th>
               <th class="text-xs font-medium text-base-content/50 w-20">Actions</th>
@@ -264,7 +294,28 @@ function formatDate(dateString: string) {
               </td>
               <td class="text-sm">{{ user.email }}</td>
               <td>
-                <span :class="['badge badge-sm', user.isActive ? 'badge-success' : 'badge-error']">
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="role in user.roles"
+                    :key="role"
+                    class="badge badge-sm border-0 bg-secondary/10 text-secondary"
+                  >
+                    {{ role }}
+                  </span>
+                  <span
+                    v-if="!user.roles || user.roles.length === 0"
+                    class="text-xs text-base-content/40"
+                    >-</span
+                  >
+                </div>
+              </td>
+              <td>
+                <span
+                  :class="[
+                    'badge badge-sm border-0',
+                    user.isActive ? 'bg-success/10 text-success' : 'bg-error/10 text-error',
+                  ]"
+                >
                   {{ user.isActive ? 'Active' : 'Inactive' }}
                 </span>
               </td>
@@ -288,6 +339,26 @@ function formatDate(dateString: string) {
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    class="btn btn-ghost btn-xs btn-square text-warning"
+                    @click="openRoleModal(user)"
+                    title="Manage Roles"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                       />
                     </svg>
                   </button>
@@ -517,6 +588,107 @@ function formatDate(dateString: string) {
       </div>
       <form method="dialog" class="modal-backdrop">
         <button @click="showDeleteModal = false">close</button>
+      </form>
+    </dialog>
+
+    <!-- Role Modal -->
+    <dialog :class="['modal', { 'modal-open': showRoleModal }]">
+      <div class="modal-box max-w-md">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 text-primary"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-lg">Assign Role</h3>
+            <p class="text-xs text-base-content/60">
+              for
+              <span class="font-medium text-base-content">{{ selectedUserForRole?.username }}</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Current Roles -->
+        <div v-if="selectedUserForRole?.roles?.length" class="mb-4 p-3 bg-base-200/50 rounded-lg">
+          <p class="text-xs text-base-content/60 mb-2">Current roles:</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span
+              v-for="role in selectedUserForRole.roles"
+              :key="role"
+              class="badge badge-sm bg-secondary/10 text-secondary border-0"
+            >
+              {{ role }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Role Selection Cards -->
+        <div class="space-y-2 mb-5">
+          <p class="text-xs font-medium text-base-content/60 uppercase tracking-wider">
+            Select a role to assign
+          </p>
+          <div v-if="!availableRoles.length" class="text-center py-6 text-base-content/50">
+            <span class="loading loading-spinner loading-sm"></span>
+            <p class="mt-2 text-sm">Loading roles...</p>
+          </div>
+          <div v-else class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <label
+              v-for="role in availableRoles"
+              :key="role.id"
+              :class="[
+                'flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all duration-150',
+                roleToAssign === role.name
+                  ? 'border-primary bg-primary/5'
+                  : 'border-base-200 hover:border-base-300 hover:bg-base-200/30',
+              ]"
+            >
+              <input
+                type="radio"
+                name="role-select"
+                :value="role.name"
+                v-model="roleToAssign"
+                class="radio radio-primary radio-sm mt-0.5"
+              />
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-sm">{{ role.name }}</p>
+                <p class="text-xs text-base-content/60 mt-0.5">
+                  {{ role.description || 'No description' }}
+                </p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-2 pt-2 border-t border-base-200">
+          <button class="btn btn-ghost btn-sm rounded-lg" @click="showRoleModal = false">
+            Cancel
+          </button>
+          <button
+            class="btn btn-primary btn-sm rounded-lg"
+            @click="handleAssignRole"
+            :disabled="usersStore.isLoading || !roleToAssign"
+          >
+            <span v-if="usersStore.isLoading" class="loading loading-spinner loading-xs"></span>
+            Assign Role
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showRoleModal = false">close</button>
       </form>
     </dialog>
   </div>
