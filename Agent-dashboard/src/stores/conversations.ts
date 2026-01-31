@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { conversationsApi } from '@/api'
+import { conversationsApi, chatApi } from '@/api'
 import type { ConversationSummary, ConversationDetail } from '@/api'
 
 export const useConversationsStore = defineStore('conversations', () => {
@@ -11,6 +11,7 @@ export const useConversationsStore = defineStore('conversations', () => {
   const currentPage = ref(1)
   const pageSize = ref(20)
   const totalPages = ref(0)
+  const searchQuery = ref('')
   const isLoading = ref(false)
   const isExporting = ref(false)
   const error = ref<string | null>(null)
@@ -26,6 +27,44 @@ export const useConversationsStore = defineStore('conversations', () => {
     return totalMessages.value / conversations.value.length
   })
 
+  // Group conversations by date relative to today
+  const groupedConversations = computed(() => {
+    const groups: Record<string, ConversationSummary[]> = {
+      Today: [],
+      Yesterday: [],
+      'Previous 7 Days': [],
+      Older: [],
+    }
+
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const yesterday = today - 86400000
+    const lastWeek = today - 86400000 * 7
+
+    conversations.value.forEach((conv) => {
+      const c = conv as any
+      const convDate = new Date(c.updatedAt || c.startedAt).getTime() // Prioritize updatedAt
+      if (convDate >= today) {
+        if (!groups['Today']) groups['Today'] = []
+        groups['Today'].push(conv)
+      } else if (convDate >= yesterday) {
+        if (!groups['Yesterday']) groups['Yesterday'] = []
+        groups['Yesterday'].push(conv)
+      } else if (convDate >= lastWeek) {
+        if (!groups['Previous 7 Days']) groups['Previous 7 Days'] = []
+        groups['Previous 7 Days'].push(conv)
+      } else {
+        if (!groups['Older']) groups['Older'] = []
+        groups['Older'].push(conv)
+      }
+    })
+
+    // Remove empty groups and return as array of { label, items }
+    return Object.entries(groups)
+      .filter(([_, items]) => items.length > 0)
+      .map(([label, items]) => ({ label, items }))
+  })
+
   // Actions
   async function fetchConversations(params?: {
     platform?: string
@@ -34,12 +73,38 @@ export const useConversationsStore = defineStore('conversations', () => {
     endDate?: string
     page?: number
     pageSize?: number
+    append?: boolean
   }) {
-    isLoading.value = true
+    const isAppend = params?.append || false
+
+    if (!isAppend) {
+      isLoading.value = true
+    }
+
+    // Update local state if params provided
+    if (params?.search !== undefined) searchQuery.value = params.search
+
+    const queryParams = {
+      ...params,
+      search: searchQuery.value || params?.search,
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 20,
+    }
+
     error.value = null
     try {
-      const response = await conversationsApi.list(params)
-      conversations.value = response.data.items
+      const response = await conversationsApi.list(queryParams)
+
+      if (isAppend) {
+        // Filter out duplicates just in case
+        const newItems = response.data.items.filter(
+          (newItem) => !conversations.value.some((existing) => existing.id === newItem.id),
+        )
+        conversations.value = [...conversations.value, ...newItems]
+      } else {
+        conversations.value = response.data.items
+      }
+
       totalCount.value = response.data.totalCount
       currentPage.value = response.data.pageNumber
       pageSize.value = response.data.pageSize
@@ -51,13 +116,82 @@ export const useConversationsStore = defineStore('conversations', () => {
     }
   }
 
+  async function fetchUserConversations(params?: {
+    page?: number
+    pageSize?: number
+    append?: boolean
+  }) {
+    const isAppend = params?.append || false
+    if (!isAppend) {
+      isLoading.value = true
+    }
+
+    const queryParams = {
+      page: params?.page || 1,
+      pageSize: params?.pageSize || 20,
+    }
+
+    error.value = null
+    try {
+      // Use chatApi for user context
+      const response = await chatApi.list(queryParams)
+
+      if (isAppend) {
+        const newItems = response.data.items.filter(
+          (newItem) => !conversations.value.some((existing) => existing.id === newItem.id),
+        )
+        conversations.value = [...conversations.value, ...newItems]
+      } else {
+        conversations.value = response.data.items
+      }
+
+      totalCount.value = response.data.totalCount
+      currentPage.value = response.data.pageNumber
+      pageSize.value = response.data.pageSize
+      totalPages.value = response.data.totalPages
+    } catch (e: any) {
+      error.value = e.response?.data?.message || e.message || 'Failed to fetch conversations'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function loadMore() {
+    if (currentPage.value < totalPages.value && !isLoading.value) {
+      // Logic for loadMore needs to know WHICH fetch to call (User vs Admin)
+      // For now, let's assume if we used fetchUserConversations before, we continue using it?
+      // Or we can check if we have admin filters.
+      // But simpler: ChatLayout calls fetchUserConversations, so we should probably have loadMoreUserConversations?
+      // Or make loadMore smart.
+      // If searchQuery or filtered params are set, maybe use fetchConversations.
+      // If simple pagination, maybe use fetchUserConversations?
+      // To be safe, ChatLayout should handle loadMore explicitly or pass a flag.
+      // Let's defaulted to fetchConversations for backward compatibility, but ChatLayout uses infinite scroll calling fetchUserConversations manually?
+      // Actually ChatLayout calls loadMore() in existing code?
+      // Let's check ChatLayout later. For now, keep loadMore as is (calling fetchConversations).
+      await fetchConversations({
+        page: currentPage.value + 1,
+        search: searchQuery.value,
+        append: true,
+      })
+    }
+  }
+
   async function fetchConversationById(id: string) {
     isLoading.value = true
     error.value = null
     try {
-      const response = await conversationsApi.getById(id)
-      selectedConversation.value = response.data
-      return response.data
+      // Try chatApi first for User (ChatView)
+      try {
+        const response = await chatApi.getById(id)
+        selectedConversation.value = response.data
+        return response.data
+      } catch (e) {
+        // Fallback to conversationsApi (Admin)
+        const response = await conversationsApi.getById(id)
+        selectedConversation.value = response.data
+        return response.data
+      }
     } catch (e: any) {
       error.value = e.response?.data?.message || e.message || 'Failed to fetch conversation'
       return null
@@ -94,7 +228,6 @@ export const useConversationsStore = defineStore('conversations', () => {
     isExporting.value = true
     error.value = null
     try {
-      // Export all conversations as JSON
       const data = conversations.value.filter((c) => {
         if (platform && c.platform !== platform) return false
         if (startDate && new Date(c.startedAt) < new Date(startDate)) return false
@@ -123,12 +256,41 @@ export const useConversationsStore = defineStore('conversations', () => {
     error.value = null
     successMessage.value = null
     try {
-      await conversationsApi.delete(id)
+      await chatApi.delete(id)
       conversations.value = conversations.value.filter((c) => c.id !== id)
       successMessage.value = 'Conversation deleted successfully'
       return true
     } catch (e: any) {
+      if (e.response?.status === 403 || e.response?.status === 404) {
+        try {
+          await conversationsApi.delete(id)
+          conversations.value = conversations.value.filter((c) => c.id !== id)
+          successMessage.value = 'Conversation deleted successfully'
+          return true
+        } catch (e2: any) {
+          error.value = e2.response?.data?.message || e2.message || 'Failed to delete conversation'
+          return false
+        }
+      }
       error.value = e.response?.data?.message || e.message || 'Failed to delete conversation'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function deleteAllConversations() {
+    isLoading.value = true
+    error.value = null
+    successMessage.value = null
+    try {
+      await chatApi.deleteAll()
+      conversations.value = []
+      selectedConversation.value = null
+      successMessage.value = 'All conversations deleted successfully'
+      return true
+    } catch (e: any) {
+      error.value = e.response?.data?.message || e.message || 'Failed to delete conversations'
       return false
     } finally {
       isLoading.value = false
@@ -154,6 +316,7 @@ export const useConversationsStore = defineStore('conversations', () => {
     totalCount,
     totalMessages,
     averageMessagesPerConversation,
+    groupedConversations,
     currentPage,
     pageSize,
     totalPages,
@@ -161,11 +324,15 @@ export const useConversationsStore = defineStore('conversations', () => {
     isExporting,
     error,
     successMessage,
+    searchQuery,
     fetchConversations,
+    fetchUserConversations,
+    loadMore,
     fetchConversationById,
     exportConversation,
     exportConversations,
     deleteConversation,
+    deleteAllConversations,
     clearError,
     clearMessages,
     setSelectedConversation,

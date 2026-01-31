@@ -42,6 +42,7 @@ public class AdminListConversationsHandler : IRequestHandler<AdminListConversati
         if (!string.IsNullOrEmpty(request.Search))
         {
             query = query.Where(c => 
+                (c.Title != null && c.Title.Contains(request.Search)) ||
                 (c.SessionId != null && c.SessionId.Contains(request.Search)) ||
                 (c.UserId.HasValue && c.UserId.Value.ToString().Contains(request.Search)));
         }
@@ -57,8 +58,9 @@ public class AdminListConversationsHandler : IRequestHandler<AdminListConversati
             .Select(c => new ConversationSummaryDto(
                 c.Id,
                 c.UserId.HasValue ? c.UserId.Value.ToString() : null,
-                null, // UserName - would need to join with Users table
-                null, // UserEmail - would need to join with Users table
+                c.User != null ? (c.User.LastName + " " + c.User.FirstName).Trim() : null, // UserName
+                c.User != null ? c.User.Email : null, // UserEmail
+                c.Title,
                 c.Platform ?? "Unknown",
                 c.Messages.Count,
                 c.CreatedAt,
@@ -95,6 +97,7 @@ public class AdminGetConversationHandler : IRequestHandler<AdminGetConversationQ
     {
         var conversation = await _context.Conversations
             .Include(c => c.Messages)
+            .Include(c => c.User)
             .FirstOrDefaultAsync(c => c.Id == request.ConversationId, cancellationToken);
 
         if (conversation == null)
@@ -106,13 +109,16 @@ public class AdminGetConversationHandler : IRequestHandler<AdminGetConversationQ
                 m.Id,
                 m.Role,
                 m.Content,
-                m.CreatedAt
+                m.CreatedAt,
+                m.Metadata
             ))
             .ToList();
 
         return new ConversationDetailDto(
             conversation.Id,
             conversation.UserId?.ToString(),
+            conversation.User != null ? (conversation.User.LastName + " " + conversation.User.FirstName).Trim() : null,
+            conversation.User?.Email,
             conversation.SessionId,
             conversation.Platform ?? "Unknown",
             messages,

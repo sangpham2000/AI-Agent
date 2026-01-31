@@ -23,6 +23,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<Message> Messages { get; set; }
     public DbSet<Document> Documents { get; set; }
     public DbSet<DocumentChunk> DocumentChunks { get; set; }
+    public DbSet<UserQuota> UserQuotas { get; set; }
+    public DbSet<TelegramUser> TelegramUsers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +106,16 @@ public class ApplicationDbContext : DbContext
                 .WithMany(d => d.Chunks)
                 .HasForeignKey(e => e.DocumentId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // UserQuota
+        modelBuilder.Entity<UserQuota>(entity =>
+        {
+            entity.HasKey(e => e.UserId);
+            entity.HasOne(e => e.User)
+                  .WithOne()
+                  .HasForeignKey<UserQuota>(e => e.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

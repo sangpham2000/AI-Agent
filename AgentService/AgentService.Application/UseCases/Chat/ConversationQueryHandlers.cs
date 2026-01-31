@@ -17,10 +17,17 @@ public class GetConversationQueryHandler : IRequestHandler<GetConversationQuery,
     {
         var conversation = await _context.Conversations
             .Where(c => c.Id == request.ConversationId)
-            .Where(c => !request.UserId.HasValue || c.UserId == request.UserId)
+            // Allow access if:
+            // 1. User is not logged in (request.UserId is null) -> implicit check by logic structure? No, if request.UserId null, the condition becomes True.
+            // 2. Conversation belongs to User (c.UserId == request.UserId)
+            // 3. Conversation is anonymous (c.UserId == null) - trusting UUID security for now.
+            .Where(c => !request.UserId.HasValue || c.UserId == request.UserId || c.UserId == null)
+            .Where(c => !c.IsDeletedByUser)
             .Select(c => new ConversationDetailDto(
                 c.Id,
                 c.UserId.HasValue ? c.UserId.Value.ToString() : null,
+                c.User != null ? (c.User.LastName + " " + c.User.FirstName).Trim() : null,
+                c.User != null ? c.User.Email : null,
                 c.SessionId,
                 c.Platform,
                 c.Messages.OrderBy(m => m.CreatedAt).Select(m => new MessageDto(
@@ -50,7 +57,8 @@ public class ListConversationsQueryHandler : IRequestHandler<ListConversationsQu
 
     public async Task<ListConversationsResponse> Handle(ListConversationsQuery request, CancellationToken cancellationToken)
     {
-        var query = _context.Conversations.AsQueryable();
+        var query = _context.Conversations.AsQueryable()
+            .Where(c => !c.IsDeletedByUser);
 
         if (request.UserId.HasValue)
             query = query.Where(c => c.UserId == request.UserId);
@@ -69,7 +77,10 @@ public class ListConversationsQueryHandler : IRequestHandler<ListConversationsQu
                 c.Platform,
                 c.CreatedAt,
                 c.UpdatedAt,
-                c.Messages.Count
+                c.Messages.Count,
+                c.User != null ? (c.User.LastName + " " + c.User.FirstName).Trim() : null,
+                c.User != null ? c.User.Email : null,
+                c.UserId.HasValue ? c.UserId.Value.ToString() : null
             ))
             .ToListAsync(cancellationToken);
 
@@ -96,9 +107,37 @@ public class DeleteConversationCommandHandler : IRequestHandler<DeleteConversati
         if (conversation == null)
             return false;
 
-        _context.Conversations.Remove(conversation);
+        conversation.IsDeletedByUser = true;
         await _context.SaveChangesAsync(cancellationToken);
 
+        return true;
+    }
+}
+
+public class DeleteAllConversationsCommandHandler : IRequestHandler<DeleteAllConversationsCommand, bool>
+{
+    private readonly IApplicationDbContext _context;
+
+    public DeleteAllConversationsCommandHandler(IApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<bool> Handle(DeleteAllConversationsCommand request, CancellationToken cancellationToken)
+    {
+        var conversations = await _context.Conversations
+            .Where(c => c.UserId == request.UserId && !c.IsDeletedByUser)
+            .ToListAsync(cancellationToken);
+
+        if (!conversations.Any())
+            return false;
+
+        foreach (var conversation in conversations)
+        {
+            conversation.IsDeletedByUser = true;
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

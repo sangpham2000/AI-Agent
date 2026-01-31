@@ -64,9 +64,10 @@ public class TelegramPollingService : BackgroundService
         }
     }
 
-    private Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+    private async Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
     {
         _logger.LogError(exception, "Telegram API Error");
-        return Task.CompletedTask;
+        // Wait a bit before retrying to avoid spamming logs if there's a persistent error
+        await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 }

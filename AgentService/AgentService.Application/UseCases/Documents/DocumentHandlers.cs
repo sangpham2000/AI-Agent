@@ -71,7 +71,14 @@ public class UploadDocumentCommandHandler : IRequestHandler<UploadDocumentComman
             if (request.FileStream.CanSeek)
             {
                 request.FileStream.Position = 0;
-                var ingested = await _flowiseService.IngestDocumentAsync(request.FileStream, request.FileName);
+                
+                var metadata = new Dictionary<string, object>();
+                if (!string.IsNullOrEmpty(request.Category))
+                {
+                    metadata["category"] = request.Category;
+                }
+                
+                var ingested = await _flowiseService.IngestDocumentAsync(request.FileStream, request.FileName, metadata);
                 
                 if (ingested)
                 {

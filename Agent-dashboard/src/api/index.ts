@@ -7,6 +7,7 @@ export { usersApi } from './users'
 export { documentsApi } from './documents'
 export { conversationsApi } from './conversations'
 export { healthApi } from './health'
+export { chatApi } from './chat'
 
 // Types
 export * from './types'

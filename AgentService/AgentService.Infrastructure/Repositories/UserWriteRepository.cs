@@ -52,6 +52,15 @@ public class UserWriteRepository : IUserWriteRepository
         var user = await _context.Users.FindAsync(id);
         if (user != null)
         {
+            // Unlink or delete associated TelegramUser entries
+            var telegramUsers = await _context.TelegramUsers.Where(tu => tu.UserId == id).ToListAsync();
+            foreach (var tUser in telegramUsers)
+            {     
+                tUser.UserId = null;
+                tUser.State = Domain.Entities.RegistrationState.None;
+                tUser.TempRole = Domain.Entities.UserType.Unknown;
+            }
+            
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
         }

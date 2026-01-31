@@ -36,20 +36,19 @@ public class AnalyticsService : IAnalyticsService
             .CountAsync(u => u.IsActive);
 
         // Messages per day (last 7 days)
-        var messagesPerDay = await _context.Messages
-            .Where(m => m.CreatedAt.Date >= weekAgo)
-            .GroupBy(m => m.CreatedAt.Date)
-            .Select(g => new { Date = g.Key, Count = g.Count() })
-            .OrderBy(x => x.Date)
+        // Messages per day (last 7 days)
+        // Fetch timestamps first to perform reliable grouping in-memory (avoids TimeZone/EF translation issues)
+        var messageTimestamps = await _context.Messages
+            .Where(m => m.CreatedAt >= weekAgo)
+            .Select(m => m.CreatedAt)
             .ToListAsync();
-
-        // Fill in missing days with 0
+            
         var messagesThisWeek = new int[7];
         for (int i = 0; i < 7; i++)
         {
             var date = weekAgo.AddDays(i);
-            var dayData = messagesPerDay.FirstOrDefault(m => m.Date == date);
-            messagesThisWeek[i] = dayData?.Count ?? 0;
+            // Compare Date components locally
+            messagesThisWeek[i] = messageTimestamps.Count(t => t.Date == date);
         }
 
         // Platform distribution
@@ -58,6 +57,53 @@ public class AnalyticsService : IAnalyticsService
             .Select(g => new PlatformDistributionDto(g.Key ?? "Unknown", g.Count()))
             .ToArrayAsync();
 
+        // Total Token Usage (Sum of UsedTokens from all UserQuotas)
+        var totalTokensUsed = await _context.UserQuotas.SumAsync(q => q.UsedTokens);
+
+        // Recent Activity Aggregation
+        var recentUsers = await _context.Users
+            .OrderByDescending(u => u.CreatedAt)
+            .Take(5)
+            .Select(u => new RecentActivityDto(
+                u.Id.ToString(),
+                $"New user registered: {u.Username}",
+                "User",
+                "New",
+                u.CreatedAt
+            ))
+            .ToListAsync();
+
+        var recentDocs = await _context.Documents
+            .OrderByDescending(d => d.CreatedAt)
+            .Take(5)
+            .Select(d => new RecentActivityDto(
+                d.Id.ToString(),
+                $"Document uploaded: {d.Title ?? d.FileName}",
+                "Document",
+                d.IsProcessed ? "Processed" : "Pending",
+                d.CreatedAt
+            ))
+            .ToListAsync();
+
+        var recentChats = await _context.Conversations
+            .OrderByDescending(c => c.CreatedAt)
+            .Take(5)
+            .Select(c => new RecentActivityDto(
+                c.Id.ToString(),
+                $"Chat started via {c.Platform}",
+                "Chat",
+                c.IsActive ? "Active" : "Closed",
+                c.CreatedAt
+            ))
+            .ToListAsync();
+
+        var allActivities = recentUsers
+            .Concat(recentDocs)
+            .Concat(recentChats)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(10)
+            .ToList();
+
         return new DashboardStatsDto(
             totalConversations,
             conversationsToday,
@@ -65,8 +111,10 @@ public class AnalyticsService : IAnalyticsService
             documentsProcessed,
             totalUsers,
             activeUsers,
+            totalTokensUsed,
             messagesThisWeek,
-            platformDistribution
+            platformDistribution,
+            allActivities
         );
     }
 
@@ -74,23 +122,18 @@ public class AnalyticsService : IAnalyticsService
     {
         var startDate = DateTime.UtcNow.Date.AddDays(-days + 1);
 
-        // Use anonymous type for projection to ensure EF Core translation
-        var rawTrends = await _context.Conversations
+        // Fetch timestamps to perform reliable grouping in-memory
+        var timestamps = await _context.Conversations
             .Where(c => c.CreatedAt >= startDate)
-            .GroupBy(c => c.CreatedAt.Date)
-            .Select(g => new { Date = g.Key, Count = g.Count() })
-            .OrderBy(t => t.Date)
+            .Select(c => c.CreatedAt)
             .ToListAsync();
 
-        var trends = rawTrends.Select(t => new ConversationTrendDto(t.Date, t.Count)).ToList();
-
-        // Fill in missing days
         var result = new List<ConversationTrendDto>();
         for (int i = 0; i < days; i++)
         {
             var date = startDate.AddDays(i);
-            var existing = trends.FirstOrDefault(t => t.Date == date);
-            result.Add(existing ?? new ConversationTrendDto(date, 0));
+            var count = timestamps.Count(t => t.Date == date);
+            result.Add(new ConversationTrendDto(date, count));
         }
 
         return result;
@@ -128,23 +171,18 @@ public class AnalyticsService : IAnalyticsService
     {
         var startDate = DateTime.UtcNow.Date.AddDays(-days + 1);
 
-        // Use anonymous type with anonymous projection
-        var rawCounts = await _context.Messages
+        // Fetch timestamps to perform reliable grouping in-memory
+        var timestamps = await _context.Messages
             .Where(m => m.CreatedAt >= startDate)
-            .GroupBy(m => m.CreatedAt.Date)
-            .Select(g => new { Date = g.Key, Count = g.Count() })
-            .OrderBy(c => c.Date)
+            .Select(m => m.CreatedAt)
             .ToListAsync();
             
-        var counts = rawCounts.Select(c => new DailyMessageCountDto(c.Date, c.Count)).ToList();
-
-        // Fill in missing days
         var result = new List<DailyMessageCountDto>();
         for (int i = 0; i < days; i++)
         {
             var date = startDate.AddDays(i);
-            var existing = counts.FirstOrDefault(c => c.Date == date);
-            result.Add(existing ?? new DailyMessageCountDto(date, 0));
+            var count = timestamps.Count(t => t.Date == date);
+            result.Add(new DailyMessageCountDto(date, count));
         }
 
         return result;

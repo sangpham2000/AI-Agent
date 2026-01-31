@@ -6,13 +6,23 @@ export interface DashboardStats {
   documentsProcessed: number
   totalUsers: number
   activeUsers: number
+  totalTokensUsedThisMonth: number
   messagesThisWeek: number[]
   conversationsByPlatform: PlatformDistribution[]
+  recentActivities: RecentActivity[]
 }
 
 export interface PlatformDistribution {
   platform: string
   count: number
+}
+
+export interface RecentActivity {
+  id: string
+  description: string
+  type: string
+  status: string
+  timestamp: string
 }
 
 export interface ConversationTrend {
@@ -45,6 +55,7 @@ export interface User {
   lastLoginAt?: string
   createdAt: string
   roles: string[]
+  quota?: UserQuota
 }
 
 export interface CreateUser {
@@ -82,6 +93,14 @@ export interface UserPermissions {
   roles: string[]
 }
 
+export interface UserQuota {
+  monthlyTokenLimit: number
+  usedTokens: number
+  lastResetDate: string
+  remainingTokens: number
+  usagePercentage: number
+}
+
 // Document API Types
 export interface Document {
   id: string
@@ -112,6 +131,7 @@ export interface ListDocumentsResponse {
 // Conversation API Types
 export interface ConversationSummary {
   id: string
+  title?: string
   userId?: string
   userName?: string
   userEmail?: string
@@ -135,12 +155,15 @@ export interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: string
+  createdAt?: string
 }
 
 export interface ConversationDetail {
   id: string
+  title?: string
   userId?: string
   userName?: string
+  userEmail?: string
   platform: string
   messages: Message[]
   startedAt: string

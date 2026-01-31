@@ -10,8 +10,21 @@ public record DashboardStatsDto(
     int DocumentsProcessed,
     int TotalUsers,
     int ActiveUsers,
+    long TotalTokensUsedThisMonth,
     int[] MessagesThisWeek,
-    PlatformDistributionDto[] ConversationsByPlatform
+    PlatformDistributionDto[] ConversationsByPlatform,
+    IEnumerable<RecentActivityDto> RecentActivities
+);
+
+/// <summary>
+/// Recent system activity
+/// </summary>
+public record RecentActivityDto(
+    string Id,
+    string Description,
+    string Type, 
+    string Status, 
+    DateTime Timestamp
 );
 
 /// <summary>

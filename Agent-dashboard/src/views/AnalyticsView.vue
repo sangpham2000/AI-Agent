@@ -5,11 +5,22 @@ import AppIcon from '@/components/ui/AppIcon.vue'
 
 const analyticsStore = useAnalyticsStore()
 
-const trendDays = ref(7)
+const trendDays = ref(30)
 const questionLimit = ref(10)
 
 onMounted(async () => {
-  await analyticsStore.fetchAll()
+  analyticsStore.isLoading = true
+  try {
+    await Promise.all([
+      analyticsStore.fetchDashboardStats(),
+      analyticsStore.fetchConversationTrends(trendDays.value),
+      analyticsStore.fetchPopularQuestions(questionLimit.value),
+      analyticsStore.fetchDailyMessageCounts(trendDays.value),
+      analyticsStore.fetchPlatformDistribution(),
+    ])
+  } finally {
+    analyticsStore.isLoading = false
+  }
 })
 
 const formatNumber = (num: number) => num.toLocaleString()

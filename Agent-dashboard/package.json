@@ -18,7 +18,9 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@types/markdown-it": "^14.1.2",
     "axios": "^1.13.2",
+    "markdown-it": "^14.1.0",
     "oidc-client-ts": "^3.4.1",
     "pinia": "^3.0.4",
     "vue": "^3.5.26",

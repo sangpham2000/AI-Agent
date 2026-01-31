@@ -31,7 +31,8 @@ public class ChatController : ControllerBase
             request.Message,
             request.SessionId,
             request.Platform,
-            _currentUserService.UserId
+            _currentUserService.UserId,
+            request.Model
         );
 
         var response = await _mediator.Send(command);
@@ -84,6 +85,26 @@ public class ChatController : ControllerBase
 
         if (!result)
             return NotFound();
+
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Delete all conversations for current user
+    /// </summary>
+    [HttpDelete("conversations")]
+    public async Task<IActionResult> DeleteAllConversations()
+    {
+        if (!_currentUserService.UserId.HasValue)
+        {
+            return Unauthorized();
+        }
+
+        var command = new DeleteAllConversationsCommand(_currentUserService.UserId.Value);
+        var result = await _mediator.Send(command);
+
+        if (!result)
+            return NotFound("No active conversations found to delete.");
 
         return NoContent();
     }

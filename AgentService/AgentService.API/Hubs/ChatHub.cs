@@ -16,7 +16,7 @@ public class ChatHub : Hub
         _currentUserService = currentUserService;
     }
 
-    public async Task SendMessage(string user, string message)
+    public async Task SendMessage(string user, string message, string model = "Gemini")
     {
         // 1. Broadcast user message immediately
         await Clients.All.SendAsync("ReceiveMessage", user, message);
@@ -29,7 +29,8 @@ public class ChatHub : Hub
                 Message: message,
                 SessionId: Context.ConnectionId,
                 Platform: "Web",
-                UserId: _currentUserService.UserId
+                UserId: _currentUserService.UserId,
+                Model: model
             );
             
             var response = await _mediator.Send(command);

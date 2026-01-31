@@ -9,3 +9,5 @@ public record ListConversationsQuery(Guid? UserId, string? SessionId, int Page =
     : IRequest<ListConversationsResponse>;
 
 public record DeleteConversationCommand(Guid ConversationId, Guid? UserId) : IRequest<bool>;
+
+public record DeleteAllConversationsCommand(Guid UserId) : IRequest<bool>;

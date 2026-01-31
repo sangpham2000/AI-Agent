@@ -54,8 +54,20 @@ const router = createRouter({
           component: () => import('@/views/ConversationsView.vue'),
           meta: { requiresAdmin: true },
         },
+
         {
-          path: 'chat',
+          path: 'profile',
+          name: 'profile',
+          component: () => import('@/views/ProfileView.vue'),
+        },
+      ],
+    },
+    {
+      path: '/chat',
+      component: () => import('@/layouts/ChatLayout.vue'),
+      children: [
+        {
+          path: '',
           name: 'chat',
           component: () => import('@/views/ChatView.vue'),
         },

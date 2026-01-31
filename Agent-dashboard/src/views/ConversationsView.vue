@@ -2,6 +2,13 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useConversationsStore } from '@/stores/conversations'
 import type { ConversationSummary, ConversationDetail } from '@/api'
+import MarkdownIt from 'markdown-it'
+
+const md = new MarkdownIt({
+  html: false,
+  breaks: true,
+  linkify: true,
+})
 
 const conversationsStore = useConversationsStore()
 
@@ -77,13 +84,19 @@ async function handleExport() {
   )
 }
 
-function formatDate(dateString: string) {
+function formatDate(dateString?: string) {
+  if (!dateString) return ''
   return new Date(dateString).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function renderMessageContent(content: string) {
+  if (!content) return ''
+  return md.render(content)
 }
 </script>
 
@@ -323,89 +336,232 @@ function formatDate(dateString: string) {
       </div>
     </div>
 
-    <!-- Conversation Detail Modal -->
-    <dialog :class="['modal', { 'modal-open': selectedConversation }]">
-      <div class="modal-box max-w-2xl max-h-[80vh]">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h3 class="font-semibold text-lg">Conversation Details</h3>
-            <p class="text-xs text-base-content/50">{{ selectedConversation?.id }}</p>
-          </div>
-          <button class="btn btn-ghost btn-sm btn-square" @click="closeDetail">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <!-- Conversation Detail Drawer -->
+    <div class="z-50 relative" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+      <!-- Backdrop -->
+      <div
+        v-if="selectedConversation"
+        class="fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+        @click="closeDetail"
+      ></div>
 
-        <!-- Loading -->
-        <div v-if="isLoadingDetail" class="flex justify-center py-12">
-          <span class="loading loading-spinner loading-md text-primary"></span>
-        </div>
-
-        <template v-else-if="selectedConversation">
-          <!-- Info -->
-          <div class="grid grid-cols-3 gap-3 mb-4">
-            <div class="p-3 bg-base-200/50 rounded-xl">
-              <p class="text-[10px] text-base-content/50 uppercase">User</p>
-              <p class="text-sm font-medium">
-                {{ selectedConversation.userName || selectedConversation.userId || 'Unknown' }}
-              </p>
-            </div>
-            <div class="p-3 bg-base-200/50 rounded-xl">
-              <p class="text-[10px] text-base-content/50 uppercase">Platform</p>
-              <p class="text-sm font-medium capitalize">{{ selectedConversation.platform }}</p>
-            </div>
-            <div class="p-3 bg-base-200/50 rounded-xl">
-              <p class="text-[10px] text-base-content/50 uppercase">Messages</p>
-              <p class="text-sm font-medium">{{ selectedConversation.messages?.length || 0 }}</p>
-            </div>
-          </div>
-
-          <!-- Messages -->
-          <div class="overflow-y-auto max-h-96 space-y-3 pr-2">
+      <!-- Slide-over panel -->
+      <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 overflow-hidden">
+          <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
             <div
-              v-for="(message, idx) in selectedConversation.messages"
-              :key="idx"
-              :class="[
-                'p-3 rounded-xl',
-                message.role === 'user' ? 'bg-primary/10 ml-8' : 'bg-base-200 mr-8',
-              ]"
+              class="pointer-events-auto w-screen max-w-2xl transform transition duration-300 ease-in-out sm:duration-500 bg-base-100 shadow-2xl flex flex-col h-full border-l border-base-200"
+              :class="selectedConversation ? 'translate-x-0' : 'translate-x-full'"
             >
-              <div class="flex items-center gap-2 mb-1">
-                <span
-                  :class="[
-                    'text-xs font-semibold',
-                    message.role === 'user' ? 'text-primary' : 'text-secondary',
-                  ]"
-                >
-                  {{ message.role === 'user' ? 'User' : 'AI' }}
-                </span>
-                <span class="text-[10px] text-base-content/40">{{
-                  formatDate(message.timestamp)
-                }}</span>
+              <!-- Header -->
+              <div
+                class="flex-shrink-0 px-6 py-4 flex items-center justify-between border-b border-base-200 bg-base-100/80 backdrop-blur-md sticky top-0 z-10"
+              >
+                <div>
+                  <h2 class="text-lg font-semibold text-base-content">
+                    {{ selectedConversation?.title || 'Conversation Detail' }}
+                  </h2>
+                  <div class="flex items-center gap-2 mt-1">
+                    <span class="text-xs text-base-content/50"
+                      >{{ selectedConversation?.id?.split('-')[0] }}...</span
+                    >
+                    <span class="badge badge-xs badge-ghost capitalize">{{
+                      selectedConversation?.platform
+                    }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button class="btn btn-ghost btn-sm btn-square" @click="closeDetail">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <p class="text-sm whitespace-pre-wrap">{{ message.content }}</p>
-            </div>
-            <div
-              v-if="!selectedConversation.messages?.length"
-              class="text-center py-8 text-base-content/40 text-sm"
-            >
-              No messages in this conversation
+
+              <!-- Content -->
+              <div class="flex-1 overflow-y-auto p-6 relative">
+                <!-- Loading -->
+                <div
+                  v-if="isLoadingDetail"
+                  class="absolute inset-0 flex items-center justify-center bg-base-100/50 z-10"
+                >
+                  <span class="loading loading-spinner loading-lg text-primary"></span>
+                </div>
+
+                <template v-else-if="selectedConversation">
+                  <!-- User Info Card -->
+                  <div
+                    class="flex items-center gap-4 p-4 bg-base-200/50 rounded-2xl mb-8 border border-base-200"
+                  >
+                    <div class="avatar placeholder">
+                      <div
+                        class="bg-gradient-to-br from-primary to-primary-focus text-primary-content w-12 rounded-xl shadow-sm"
+                      >
+                        <span class="text-lg font-bold">{{
+                          (selectedConversation.userName || 'U').charAt(0).toUpperCase()
+                        }}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p class="font-bold text-base">
+                        {{ selectedConversation.userName || 'Unknown User' }}
+                      </p>
+                      <p class="text-xs text-base-content/60">
+                        {{ selectedConversation.userEmail || 'No email' }}
+                      </p>
+                    </div>
+                    <div class="ml-auto text-right">
+                      <p
+                        class="text-[10px] text-base-content/40 uppercase font-semibold tracking-wider mb-0.5"
+                      >
+                        Summary
+                      </p>
+                      <div class="flex items-center gap-2 justify-end text-sm font-medium">
+                        <span
+                          class="flex items-center gap-1.5 bg-base-100 px-2 py-1 rounded-lg border border-base-200 shadow-sm"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3.5 w-3.5 text-primary"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          {{ selectedConversation.messages?.length || 0 }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Chat History -->
+                  <div class="space-y-6 pb-4">
+                    <div
+                      v-for="(message, idx) in selectedConversation.messages"
+                      :key="idx"
+                      class="chat"
+                      :class="message.role === 'user' ? 'chat-end' : 'chat-start'"
+                    >
+                      <!-- Avatar -->
+                      <div class="chat-image avatar">
+                        <div
+                          class="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                          :class="
+                            message.role === 'user'
+                              ? 'bg-primary text-primary-content'
+                              : 'bg-base-300 text-base-content'
+                          "
+                        >
+                          <svg
+                            v-if="message.role === 'user'"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                          <svg
+                            v-else
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l-.9.9a2 2 0 01-2.9 0l-.9-.9H5a2 2 0 01-2-2V5zm5 11l.9.9a.6.6 0 00.9 0l.9-.9H15a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h5z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+
+                      <!-- Header -->
+                      <div
+                        class="chat-header text-xs text-base-content/40 mb-1 flex items-center gap-1"
+                      >
+                        <span class="font-semibold text-base-content/70">{{
+                          message.role === 'user' ? 'User' : 'Assistant'
+                        }}</span>
+                        <time class="opacity-50 text-[10px]">{{
+                          formatDate(message.createdAt)
+                        }}</time>
+                      </div>
+
+                      <!-- Bubble -->
+                      <div
+                        class="chat-bubble shadow-sm text-sm"
+                        :class="[
+                          message.role === 'user'
+                            ? 'chat-bubble-primary bg-primary text-primary-content rounded-tr-sm'
+                            : 'bg-base-200 text-base-content rounded-tl-sm',
+                        ]"
+                      >
+                        <!-- Render Markdown here -->
+                        <div
+                          v-html="renderMessageContent(message.content)"
+                          class="markdown-body prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0.5"
+                          :class="{ 'prose-invert': message.role === 'user' }"
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div
+                      v-if="!selectedConversation.messages?.length"
+                      class="text-center py-12 text-base-content/40 italic"
+                    >
+                      No messages recorded.
+                    </div>
+                  </div>
+                </template>
+              </div>
             </div>
           </div>
-        </template>
+        </div>
       </div>
-      <form method="dialog" class="modal-backdrop">
-        <button @click="closeDetail">close</button>
-      </form>
-    </dialog>
+    </div>
   </div>
 </template>
+
+<style>
+/* Basic markdown styling fixes if prose is not available or incomplete */
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}
+.markdown-body p {
+  margin-bottom: 0.5em;
+}
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+.chat-bubble-primary .markdown-body a {
+  color: inherit;
+  text-decoration: underline;
+}
+</style>

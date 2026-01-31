@@ -19,6 +19,7 @@ public record ConversationSummaryDto(
     string? UserId,
     string? UserName,
     string? UserEmail,
+    string? Title,
     string Platform,
     int MessageCount,
     DateTime StartedAt,

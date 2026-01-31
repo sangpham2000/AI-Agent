@@ -19,11 +19,32 @@ const formatCompact = (num: number) => {
   return num.toString()
 }
 
+const timeAgo = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const now = new Date()
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (seconds < 60) return 'Just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
+
 const totalMessagesThisWeek = computed(() => {
   return analyticsStore.messagesThisWeek.reduce((a, b) => a + b, 0)
 })
 
-const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const dayLabels = computed(() => {
+  const days = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    days.push(d.toLocaleDateString('en-US', { weekday: 'short' }))
+  }
+  return days
+})
 const maxMessages = computed(() => Math.max(...analyticsStore.messagesThisWeek, 1))
 
 const quickInsights = computed(() => [
@@ -41,13 +62,6 @@ const systemMetrics = [
   { label: 'Response Time', value: '200ms', status: 'Acceptable', statusColor: 'success' },
   { label: 'AI Performance', value: '350 tokens/req', status: 'Efficient', statusColor: 'info' },
   { label: 'Server Load', value: '75%', status: 'High Load', statusColor: 'warning' },
-]
-
-const recentTasks = [
-  { name: 'Model Fine-Tuning', status: 'In Progress', duration: '2h 30m', icon: 'lightning-bolt' },
-  { name: 'Dataset Processing', status: 'On Hold', duration: '1h 15m', icon: 'chart-bar' },
-  { name: 'Generating AI Art', status: 'Done', duration: '45m', icon: 'color-swatch' },
-  { name: 'Running Inference', status: 'In Progress', duration: '5h 10m', icon: 'rocket' },
 ]
 </script>
 
@@ -107,10 +121,12 @@ const recentTasks = [
       <div class="lg:col-span-2 bg-base-100 rounded-2xl p-5 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="chip" class="w-3.5 h-3.5" />
-          Token Consumption
+          System Token Consumption
         </p>
-        <p class="text-2xl font-bold">{{ formatCompact(totalMessagesThisWeek * 150) }}</p>
-        <p class="text-[11px] text-base-content/50">Higher than usual</p>
+        <p class="text-2xl font-bold">
+          {{ formatCompact(analyticsStore.totalTokensUsedThisMonth || 0) }}
+        </p>
+        <p class="text-[11px] text-base-content/50">This Month</p>
       </div>
 
       <!-- AI Model Accuracy -->
@@ -245,37 +261,29 @@ const recentTasks = [
               <div
                 class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold"
               >
-                N7
+                G
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium">NeuroX-7</p>
+                <p class="text-sm font-medium">Gemini</p>
                 <div class="flex items-center gap-2">
-                  <progress
-                    class="progress progress-primary w-16 h-1"
-                    value="70"
-                    max="100"
-                  ></progress>
-                  <p class="text-[10px] text-base-content/50">95k reqs</p>
+                  <span class="badge badge-xs bg-success/10 text-success"> Active </span>
+                  <p class="text-[10px] text-base-content/50">Default</p>
                 </div>
               </div>
             </div>
             <div
-              class="flex items-center gap-3 p-2.5 rounded-xl bg-base-50 hover:bg-base-200/50 transition-colors border border-transparent hover:border-base-200 cursor-pointer"
+              class="flex items-center gap-3 p-2.5 rounded-xl bg-base-50 hover:bg-base-200/50 transition-colors border border-transparent hover:border-base-200 cursor-pointer opacity-60"
             >
               <div
                 class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary text-xs font-bold"
               >
-                SM
+                PT
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium">SynthaMind-5</p>
+                <p class="text-sm font-medium">GPT-4o Mini</p>
                 <div class="flex items-center gap-2">
-                  <progress
-                    class="progress progress-secondary w-16 h-1"
-                    value="45"
-                    max="100"
-                  ></progress>
-                  <p class="text-[10px] text-base-content/50">72k reqs</p>
+                  <span class="badge badge-xs badge-ghost gap-1"> Inactive </span>
+                  <p class="text-[10px] text-base-content/50">Coming Soon</p>
                 </div>
               </div>
             </div>
@@ -339,104 +347,138 @@ const recentTasks = [
         </div>
       </div>
 
-      <!-- Recent Generations -->
+      <!-- Recent Event Feed -->
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="clock" class="w-4 h-4 text-warning" />
-            Recent Activity
+            System Event Feed
           </h3>
         </div>
         <div class="overflow-x-auto">
           <table class="table table-sm">
             <thead>
               <tr class="text-xs text-base-content/50 border-b border-base-200">
-                <th class="font-medium pl-0">Task</th>
-                <th class="font-medium">Status</th>
+                <th class="font-medium pl-0">Event</th>
+                <th class="font-medium">Type</th>
                 <th class="font-medium pr-0 text-right">Time</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="task in recentTasks" :key="task.name" class="hover border-0">
+              <tr
+                v-for="activity in analyticsStore.recentActivities"
+                :key="activity.id"
+                class="hover border-0"
+              >
                 <td class="flex items-center gap-2 pl-0">
                   <div class="p-1.5 rounded-md bg-base-200">
-                    <AppIcon :name="task.icon" class="w-3.5 h-3.5 text-base-content/70" />
+                    <AppIcon
+                      :name="
+                        activity.type === 'User'
+                          ? 'user'
+                          : activity.type === 'Document'
+                            ? 'document-text'
+                            : 'chat'
+                      "
+                      class="w-3.5 h-3.5 text-base-content/70"
+                    />
                   </div>
-                  <span class="text-sm font-medium">{{ task.name }}</span>
+                  <span
+                    class="text-sm font-medium truncate max-w-[150px]"
+                    :title="activity.description"
+                    >{{ activity.description }}</span
+                  >
                 </td>
                 <td>
                   <span
                     :class="[
                       'badge badge-xs font-medium border-0 py-2',
-                      task.status === 'Done'
+                      activity.status === 'New' ||
+                      activity.status === 'Processed' ||
+                      activity.status === 'Active'
                         ? 'bg-success/15 text-success'
-                        : task.status === 'In Progress'
-                          ? 'bg-info/15 text-info'
-                          : 'bg-warning/15 text-warning',
+                        : activity.status === 'Pending'
+                          ? 'bg-warning/15 text-warning'
+                          : 'bg-info/15 text-info',
                     ]"
                   >
-                    {{ task.status }}
+                    {{ activity.status }}
                   </span>
                 </td>
-                <td class="text-xs text-base-content/60 pr-0 text-right">{{ task.duration }}</td>
+                <td class="text-xs text-base-content/60 pr-0 text-right whitespace-nowrap">
+                  {{ timeAgo(activity.timestamp) }}
+                </td>
+              </tr>
+              <tr v-if="analyticsStore.recentActivities.length === 0">
+                <td colspan="3" class="text-center text-xs text-base-content/50 py-4">
+                  No recent activity
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <!-- Resource Utilization -->
+      <!-- System Resources / Knowledge Base -->
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200/50">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
-            <AppIcon name="database" class="w-4 h-4 text-error" />
-            Resources
+            <AppIcon name="database" class="w-4 h-4 text-primary" />
+            Knowledge Base
           </h3>
-          <RouterLink to="/analytics" class="btn btn-ghost btn-xs opacity-50 hover:opacity-100"
+          <RouterLink
+            to="/dashboard/documents"
+            class="btn btn-ghost btn-xs opacity-50 hover:opacity-100"
             >View All</RouterLink
           >
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div class="p-3 rounded-xl bg-base-50 border border-base-100 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
-              <AppIcon name="cloud" class="w-4 h-4" />
+            <div
+              class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
+            >
+              <AppIcon name="document-text" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">EchoWave</p>
-              <p class="text-[10px] text-base-content/50">Online</p>
+              <p class="text-xs font-semibold">Total Docs</p>
+              <p class="text-[10px] text-base-content/50">
+                {{ analyticsStore.totalDocuments }} files
+              </p>
             </div>
           </div>
           <div class="p-3 rounded-xl bg-base-50 border border-base-100 flex items-center gap-3">
             <div
               class="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center text-success"
             >
-              <AppIcon name="microphone" class="w-4 h-4" />
+              <AppIcon name="check-circle" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">SynthVoice</p>
-              <p class="text-[10px] text-base-content/50">Active</p>
-            </div>
-          </div>
-          <div class="p-3 rounded-xl bg-base-50 border border-base-100 flex items-center gap-3">
-            <div
-              class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
-            >
-              <AppIcon name="brain" class="w-4 h-4" />
-            </div>
-            <div>
-              <p class="text-xs font-semibold">Cortex</p>
-              <p class="text-[10px] text-base-content/50">Processing</p>
+              <p class="text-xs font-semibold">Processed</p>
+              <p class="text-[10px] text-base-content/50">
+                {{ analyticsStore.documentsProcessed }} ready
+              </p>
             </div>
           </div>
           <div class="p-3 rounded-xl bg-base-50 border border-base-100 flex items-center gap-3">
             <div
               class="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center text-warning"
             >
-              <AppIcon name="document-text" class="w-4 h-4" />
+              <AppIcon name="clock" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">DeepScribe</p>
-              <p class="text-[10px] text-base-content/50">Idle</p>
+              <p class="text-xs font-semibold">Pending</p>
+              <p class="text-[10px] text-base-content/50">
+                {{ analyticsStore.totalDocuments - analyticsStore.documentsProcessed }} waiting
+              </p>
+            </div>
+          </div>
+          <div class="p-3 rounded-xl bg-base-50 border border-base-100 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-info/10 flex items-center justify-center text-info">
+              <AppIcon name="server" class="w-4 h-4" />
+            </div>
+            <div>
+              <p class="text-xs font-semibold">Vector DB</p>
+              <p class="text-[10px] text-base-content/50">Connected</p>
             </div>
           </div>
         </div>

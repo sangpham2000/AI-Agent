@@ -71,8 +71,73 @@ public static class ServiceCollectionExtensions
                         ValidateLifetime = true,
                         ValidIssuer = configuration["Keycloak:Authority"],
                         ValidAudience = configuration["Keycloak:Audience"],
-                        RoleClaimType = "realm_access",
                         NameClaimType = "preferred_username"
+                    };
+
+                    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+                    {
+                        OnTokenValidated = context =>
+                        {
+                            var claimsIdentity = context.Principal?.Identity as System.Security.Claims.ClaimsIdentity;
+                            if (claimsIdentity != null)
+                            {
+                                // Map nested "realm_access": { "roles": [...] } to Role claims
+                                var realmAccessDiff = claimsIdentity.FindFirst("realm_access")?.Value;
+                                if (!string.IsNullOrEmpty(realmAccessDiff))
+                                {
+                                    try 
+                                    {
+                                        var realmAccess = System.Text.Json.JsonDocument.Parse(realmAccessDiff).RootElement;
+                                        if (realmAccess.TryGetProperty("roles", out var rolesElement) && rolesElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                        {
+                                            foreach (var role in rolesElement.EnumerateArray())
+                                            {
+                                                var roleValue = role.GetString();
+                                                if (!string.IsNullOrEmpty(roleValue))
+                                                {
+                                                    claimsIdentity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, roleValue));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // Ignore parsing errors
+                                    }
+                                }
+
+                                // Map nested "resource_access": { "client-id": { "roles": [...] } } to Role claims
+                                var resourceAccessDiff = claimsIdentity.FindFirst("resource_access")?.Value;
+                                if (!string.IsNullOrEmpty(resourceAccessDiff))
+                                {
+                                    try
+                                    {
+                                        var resourceAccess = System.Text.Json.JsonDocument.Parse(resourceAccessDiff).RootElement;
+                                        var clientId = configuration["Keycloak:ClientId"]; // e.g. "ai-agent-app"
+                                        
+                                        if (!string.IsNullOrEmpty(clientId) && 
+                                            resourceAccess.TryGetProperty(clientId, out var clientAccess) && 
+                                            clientAccess.TryGetProperty("roles", out var rolesElement) && 
+                                            rolesElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                        {
+                                            foreach (var role in rolesElement.EnumerateArray())
+                                            {
+                                                var roleValue = role.GetString();
+                                                if (!string.IsNullOrEmpty(roleValue))
+                                                {
+                                                    claimsIdentity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, roleValue));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // Ignore parsing errors
+                                    }
+                                }
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
 

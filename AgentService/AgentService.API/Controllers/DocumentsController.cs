@@ -34,7 +34,7 @@ public class DocumentsController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded");
 
-        var allowedExtensions = new[] { ".pdf", ".docx", ".doc", ".txt" };
+        var allowedExtensions = new[] { ".pdf", ".docx", ".doc", ".txt", ".md" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         
         if (!allowedExtensions.Contains(extension))

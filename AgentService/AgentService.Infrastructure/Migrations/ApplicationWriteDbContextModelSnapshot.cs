@@ -152,6 +152,10 @@ namespace AgentService.Infrastructure.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
+                    b.Property<bool>("IsDeletedByUser")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted_by_user");
+
                     b.Property<string>("Platform")
                         .IsRequired()
                         .HasColumnType("text")
@@ -353,6 +357,41 @@ namespace AgentService.Infrastructure.Migrations
                     b.ToTable("messages");
                 });
 
+            modelBuilder.Entity("AgentService.Domain.Entities.TelegramUser", b =>
+                {
+                    b.Property<long>("ChatId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("chat_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("ChatId"));
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer")
+                        .HasColumnName("state");
+
+                    b.Property<int>("TempRole")
+                        .HasColumnType("integer")
+                        .HasColumnName("temp_role");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("username");
+
+                    b.HasKey("ChatId")
+                        .HasName("pk_telegram_users");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_telegram_users_user_id");
+
+                    b.ToTable("telegram_users");
+                });
+
             modelBuilder.Entity("AgentService.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -399,6 +438,14 @@ namespace AgentService.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
 
+                    b.Property<string>("StudentId")
+                        .HasColumnType("text")
+                        .HasColumnName("student_id");
+
+                    b.Property<int>("UserType")
+                        .HasColumnType("integer")
+                        .HasColumnName("user_type");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text")
@@ -408,6 +455,30 @@ namespace AgentService.Infrastructure.Migrations
                         .HasName("pk_users");
 
                     b.ToTable("users");
+                });
+
+            modelBuilder.Entity("AgentService.Domain.Entities.UserQuota", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("user_id");
+
+                    b.Property<DateTime>("LastResetDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_reset_date");
+
+                    b.Property<long>("MonthlyTokenLimit")
+                        .HasColumnType("bigint")
+                        .HasColumnName("monthly_token_limit");
+
+                    b.Property<long>("UsedTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("used_tokens");
+
+                    b.HasKey("UserId")
+                        .HasName("pk_user_quotas");
+
+                    b.ToTable("user_quotas");
                 });
 
             modelBuilder.Entity("AgentService.Domain.Entities.Auth.RolePermission", b =>
@@ -496,6 +567,28 @@ namespace AgentService.Infrastructure.Migrations
                         .HasConstraintName("fk_messages_conversations_conversation_id");
 
                     b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("AgentService.Domain.Entities.TelegramUser", b =>
+                {
+                    b.HasOne("AgentService.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .HasConstraintName("fk_telegram_users_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("AgentService.Domain.Entities.UserQuota", b =>
+                {
+                    b.HasOne("AgentService.Domain.Entities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("AgentService.Domain.Entities.UserQuota", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_user_quotas_users_user_id");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("AgentService.Domain.Entities.Auth.Role", b =>

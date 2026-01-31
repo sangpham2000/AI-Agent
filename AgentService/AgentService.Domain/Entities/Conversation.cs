@@ -9,6 +9,7 @@ public class Conversation
     public string? SessionId { get; set; } // For anonymous web users
     public string? Title { get; set; } // Auto-generated from first message
     public bool IsActive { get; set; } = true;
+    public bool IsDeletedByUser { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

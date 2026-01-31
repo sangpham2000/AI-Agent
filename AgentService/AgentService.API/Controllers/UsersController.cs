@@ -90,4 +90,11 @@ public class UsersController : ControllerBase
         var result = await _mediator.Send(new GetMyPermissionsQuery(id));
         return Ok(result);
     }
+
+    [HttpGet("{id}/quota")]
+    public async Task<ActionResult<UserQuotaDto>> GetQuota(Guid id)
+    {
+        var result = await _mediator.Send(new GetMyQuotaQuery(id));
+        return Ok(result);
+    }
 }

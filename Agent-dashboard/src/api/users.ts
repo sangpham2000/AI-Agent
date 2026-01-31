@@ -1,5 +1,13 @@
 import apiClient from './client'
-import type { User, CreateUser, UpdateUser, UserPermissions, Role, Permission } from './types'
+import type {
+  User,
+  CreateUser,
+  UpdateUser,
+  UserPermissions,
+  Role,
+  Permission,
+  UserQuota,
+} from './types'
 
 /**
  * Users API endpoints
@@ -42,6 +50,10 @@ export const usersApi = {
 
   getPermissions(id: string) {
     return apiClient.get<UserPermissions>(`/users/${id}/permissions`)
+  },
+
+  getQuota(id: string) {
+    return apiClient.get<UserQuota>(`/users/${id}/quota`)
   },
 }
 

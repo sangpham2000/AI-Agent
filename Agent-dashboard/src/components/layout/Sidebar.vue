@@ -59,7 +59,7 @@ const allMenuGroups: MenuGroup[] = [
   {
     id: 'tools',
     label: 'Tools',
-    items: [{ name: 'Chat Demo', path: '/dashboard/chat', icon: 'message', badge: 'Live' }],
+    items: [{ name: 'Chat Demo', path: '/chat', icon: 'message', badge: 'Live' }],
   },
 ]
 

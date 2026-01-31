@@ -31,7 +31,7 @@ public static class WebApplicationExtensions
             {
                 // We typically use logger instead of console in real apps, but console is fine for dev start msg
                 var logger = app.Services.GetRequiredService<ILogger<Program>>();
-                logger.LogWarning("⚠️  Development mode: Authentication is BYPASSED!");
+                logger.LogWarning("Development mode: Authentication is BYPASSED!");
             }
         }
 

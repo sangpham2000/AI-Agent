@@ -4,7 +4,8 @@ public record SendMessageRequest(
     Guid? ConversationId,
     string Message,
     string? SessionId = null,
-    string Platform = "web_plugin"
+    string Platform = "web_plugin",
+    string Model = "Gemini"
 );
 
 public record SendMessageResponse(
@@ -20,7 +21,10 @@ public record ConversationDto(
     string Platform,
     DateTime CreatedAt,
     DateTime UpdatedAt,
-    int MessageCount
+    int MessageCount,
+    string? UserName = null,
+    string? UserEmail = null,
+    string? UserId = null
 );
 
 public record MessageDto(
@@ -34,6 +38,8 @@ public record MessageDto(
 public record ConversationDetailDto(
     Guid Id,
     string? UserId,
+    string? UserName,
+    string? UserEmail,
     string? SessionId,
     string Platform,
     List<MessageDto> Messages,

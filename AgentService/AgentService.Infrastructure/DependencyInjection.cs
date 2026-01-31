@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IAnalyticsService, AnalyticsService>();
         services.AddScoped<IFileStorageService, FileStorageService>();
+        services.AddScoped<IQuotaService, QuotaService>();
         
         // Flowise Service
         services.AddHttpClient<IFlowiseService, FlowiseService>(client =>
@@ -68,7 +69,14 @@ public static class DependencyInjection
         var botToken = configuration["Telegram:BotToken"];
         if (!string.IsNullOrEmpty(botToken))
         {
-            services.AddSingleton<ITelegramBotClient>(sp => new TelegramBotClient(botToken));
+            services.AddSingleton<ITelegramBotClient>(sp => 
+            {
+                var client = new TelegramBotClient(botToken, new HttpClient 
+                { 
+                    Timeout = TimeSpan.FromSeconds(180) 
+                });
+                return client;
+            });
             services.AddScoped<ITelegramService, TelegramService>();
             
             // Register Hosted Service for Polling (Always on for local dev as requested)

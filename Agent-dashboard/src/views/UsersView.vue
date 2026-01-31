@@ -260,6 +260,7 @@ function formatDate(dateString: string) {
               <th class="text-xs font-medium text-base-content/50">User</th>
               <th class="text-xs font-medium text-base-content/50">Email</th>
               <th class="text-xs font-medium text-base-content/50">Roles</th>
+              <th class="text-xs font-medium text-base-content/50">Quota Usage</th>
               <th class="text-xs font-medium text-base-content/50">Status</th>
               <th class="text-xs font-medium text-base-content/50">Created</th>
               <th class="text-xs font-medium text-base-content/50 w-20">Actions</th>
@@ -272,7 +273,7 @@ function formatDate(dateString: string) {
               </td>
             </tr>
             <tr v-else-if="!filteredUsers.length">
-              <td colspan="5" class="text-center py-12 text-base-content/50">No users found</td>
+              <td colspan="6" class="text-center py-12 text-base-content/50">No users found</td>
             </tr>
             <tr v-for="user in filteredUsers" :key="user.id" class="hover border-base-200">
               <td>
@@ -308,6 +309,32 @@ function formatDate(dateString: string) {
                     >-</span
                   >
                 </div>
+              </td>
+              <td>
+                <div v-if="user.quota" class="flex flex-col gap-1 w-32">
+                  <div class="flex justify-between text-xs">
+                    <span class="font-medium text-base-content/70"
+                      >{{ user.quota.usagePercentage }}%</span
+                    >
+                    <span class="text-base-content/40"
+                      >{{ (user.quota.usedTokens / 1000).toFixed(1) }}k /
+                      {{ (user.quota.monthlyTokenLimit / 1000).toFixed(0) }}k</span
+                    >
+                  </div>
+                  <progress
+                    class="progress w-full h-1.5"
+                    :class="[
+                      user.quota.usagePercentage > 90
+                        ? 'progress-error'
+                        : user.quota.usagePercentage > 75
+                          ? 'progress-warning'
+                          : 'progress-primary',
+                    ]"
+                    :value="user.quota.usedTokens"
+                    :max="user.quota.monthlyTokenLimit"
+                  ></progress>
+                </div>
+                <span v-else class="text-xs text-base-content/40">N/A</span>
               </td>
               <td>
                 <span

@@ -23,7 +23,14 @@ const searchQuery = ref('')
 const categoryFilter = ref('')
 const processedFilter = ref<'all' | 'processed' | 'pending'>('all')
 
-const categories = ['General', 'Technical', 'Legal', 'Marketing', 'HR', 'Finance']
+const categories = [
+  'Admission',
+  'Academic',
+  'Student Affairs',
+  'IT Support',
+  'Regulations',
+  'General',
+]
 
 const filteredDocuments = computed(() => {
   let result = documentsStore.documents
@@ -62,6 +69,8 @@ function handleFileSelect(event: Event) {
     if (!uploadTitle.value) {
       uploadTitle.value = target.files[0].name.replace(/\.[^/.]+$/, '')
     }
+    // Reset input value to allow selecting the same file again
+    target.value = ''
   }
 }
 
@@ -304,7 +313,7 @@ function getFileIcon(fileType: string): string {
             <input
               ref="fileInputRef"
               type="file"
-              accept=".pdf,.doc,.docx,.txt"
+              accept=".pdf,.doc,.docx,.txt,.md"
               class="hidden"
               @change="handleFileSelect"
             />
@@ -324,7 +333,7 @@ function getFileIcon(fileType: string): string {
                 <AppIcon name="cloud-upload" class="w-6 h-6" />
               </div>
               <p class="text-sm text-base-content/60">Drop files here or click to upload</p>
-              <p class="text-xs text-base-content/40">PDF, DOC, DOCX, TXT</p>
+              <p class="text-xs text-base-content/40">PDF, DOC, DOCX, TXT, MD</p>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
@@ -338,7 +347,9 @@ function getFileIcon(fileType: string): string {
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Category</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                Category <span class="text-error">*</span>
+              </label>
               <select
                 v-model="uploadCategory"
                 class="select select-sm select-bordered rounded-lg focus:outline-none focus:border-primary"
@@ -369,7 +380,7 @@ function getFileIcon(fileType: string): string {
             <button
               type="submit"
               class="btn btn-primary btn-sm rounded-lg"
-              :disabled="!uploadFile || documentsStore.isUploading"
+              :disabled="!uploadFile || !uploadCategory || documentsStore.isUploading"
             >
               <span
                 v-if="documentsStore.isUploading"

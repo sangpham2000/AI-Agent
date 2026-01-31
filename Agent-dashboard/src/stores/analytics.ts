@@ -26,6 +26,10 @@ export const useAnalyticsStore = defineStore('analytics', () => {
   const documentsProcessed = computed(() => dashboardStats.value?.documentsProcessed ?? 0)
   const totalUsers = computed(() => dashboardStats.value?.totalUsers ?? 0)
   const activeUsers = computed(() => dashboardStats.value?.activeUsers ?? 0)
+  const totalTokensUsedThisMonth = computed(
+    () => dashboardStats.value?.totalTokensUsedThisMonth ?? 0,
+  )
+  const recentActivities = computed(() => dashboardStats.value?.recentActivities ?? [])
   const messagesThisWeek = computed(() => dashboardStats.value?.messagesThisWeek ?? [])
 
   // Actions
@@ -116,6 +120,8 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     documentsProcessed,
     totalUsers,
     activeUsers,
+    totalTokensUsedThisMonth,
+    recentActivities,
     messagesThisWeek,
     // Actions
     fetchDashboardStats,

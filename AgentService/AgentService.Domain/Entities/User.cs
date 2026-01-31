@@ -15,4 +15,14 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<AgentService.Domain.Entities.Auth.UserRole> UserRoles { get; set; } = new List<AgentService.Domain.Entities.Auth.UserRole>();
+
+    public string? StudentId { get; set; }
+    public UserType UserType { get; set; } = UserType.Unknown;
+}
+
+public enum UserType
+{
+    Unknown,
+    Student,
+    Staff
 }

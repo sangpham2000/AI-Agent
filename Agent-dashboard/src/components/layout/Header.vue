@@ -191,12 +191,13 @@ function toggleTheme() {
             </p>
           </div>
           <li>
-            <a
+            <router-link
+              to="/dashboard/profile"
               class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-base-200/60 font-medium"
             >
               <AppIcon name="user" class="w-4 h-4 opacity-70" />
               Profile
-            </a>
+            </router-link>
           </li>
           <li>
             <a
