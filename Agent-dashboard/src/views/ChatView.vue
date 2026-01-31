@@ -98,6 +98,8 @@ watch(
   { deep: true },
 )
 
+const textareaRef = ref<HTMLTextAreaElement | null>(null)
+
 const sendMessage = async () => {
   if (!message.value.trim() || isLoading.value) return
 
@@ -139,6 +141,8 @@ const sendMessage = async () => {
     messages.value.push({ role: 'assistant', content: t('chat.error'), timestamp: new Date() })
   } finally {
     isLoading.value = false
+    await nextTick()
+    textareaRef.value?.focus()
   }
 }
 
@@ -349,6 +353,7 @@ function renderMessageContent(content: string) {
           >
             <div class="flex items-end gap-2">
               <textarea
+                ref="textareaRef"
                 v-model="message"
                 @keydown.enter.exact.prevent="sendMessage"
                 @input="
