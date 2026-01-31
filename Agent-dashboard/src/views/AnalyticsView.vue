@@ -64,9 +64,7 @@ async function changeQuestionLimit(limit: number) {
   await analyticsStore.fetchPopularQuestions(limit)
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
+import { formatDate } from '@/utils/format'
 </script>
 
 <template>

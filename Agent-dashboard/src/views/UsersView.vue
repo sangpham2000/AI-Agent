@@ -152,9 +152,7 @@ async function handleAssignRole() {
   }
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString()
-}
+import { formatDate } from '@/utils/format'
 </script>
 
 <template>

@@ -185,7 +185,7 @@ const icons: Record<string, string> = {
     <!-- Footer -->
     <div class="p-2.5 border-t border-base-200 flex-shrink-0">
       <!-- User -->
-      <div
+      <!-- <div
         :class="[
           'flex items-center gap-2.5 p-2 rounded-lg hover:bg-base-200 transition-colors cursor-pointer',
           isCollapsed ? 'justify-center' : '',
@@ -221,7 +221,7 @@ const icons: Record<string, string> = {
             <path stroke-linecap="round" stroke-linejoin="round" :d="icons.logout" />
           </svg>
         </button>
-      </div>
+      </div> -->
 
       <!-- Collapse Toggle -->
       <button
