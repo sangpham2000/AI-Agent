@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useUsersStore } from '@/stores/users'
 import { rolesApi } from '@/api/users'
 import type { User, CreateUser, UpdateUser, Role } from '@/api/types'
 
+const { t } = useI18n()
 const usersStore = useUsersStore()
 
 // Modal state
@@ -160,9 +162,9 @@ import { formatDate } from '@/utils/format'
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">User Management</h1>
+        <h1 class="text-xl font-semibold">{{ t('users.title') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-          Manage users and their access to the system.
+          {{ t('users.subtitle') }}
         </p>
       </div>
       <button class="btn btn-primary btn-sm gap-1.5 rounded-lg" @click="openCreateModal">
@@ -176,7 +178,7 @@ import { formatDate } from '@/utils/format'
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
         </svg>
-        Add User
+        {{ t('users.addUser') }}
       </button>
     </div>
 
@@ -197,7 +199,9 @@ import { formatDate } from '@/utils/format'
         />
       </svg>
       <span>{{ usersStore.error }}</span>
-      <button class="btn btn-ghost btn-xs" @click="usersStore.clearMessages()">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="usersStore.clearMessages()">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
     <div v-if="usersStore.successMessage" class="alert alert-success text-sm py-3">
       <svg
@@ -210,7 +214,9 @@ import { formatDate } from '@/utils/format'
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
       </svg>
       <span>{{ usersStore.successMessage }}</span>
-      <button class="btn btn-ghost btn-xs" @click="usersStore.clearMessages()">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="usersStore.clearMessages()">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
 
     <!-- Filters -->
@@ -234,7 +240,7 @@ import { formatDate } from '@/utils/format'
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Search users..."
+            :placeholder="t('users.searchPlaceholder')"
             class="input input-sm w-full pl-9 bg-base-200/50 border-0 rounded-lg"
           />
         </div>
@@ -242,9 +248,9 @@ import { formatDate } from '@/utils/format'
           v-model="statusFilter"
           class="select select-sm w-full sm:w-40 bg-base-200/50 border-0 rounded-lg"
         >
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="all">{{ t('users.allStatus') }}</option>
+          <option value="active">{{ t('users.active') }}</option>
+          <option value="inactive">{{ t('users.inactive') }}</option>
         </select>
       </div>
     </div>
@@ -255,13 +261,19 @@ import { formatDate } from '@/utils/format'
         <table class="table">
           <thead>
             <tr class="border-base-200">
-              <th class="text-xs font-medium text-base-content/50">User</th>
-              <th class="text-xs font-medium text-base-content/50">Email</th>
-              <th class="text-xs font-medium text-base-content/50">Roles</th>
-              <th class="text-xs font-medium text-base-content/50">Quota Usage</th>
-              <th class="text-xs font-medium text-base-content/50">Status</th>
-              <th class="text-xs font-medium text-base-content/50">Created</th>
-              <th class="text-xs font-medium text-base-content/50 w-20">Actions</th>
+              <th class="text-xs font-medium text-base-content/50">{{ t('users.table.user') }}</th>
+              <th class="text-xs font-medium text-base-content/50">{{ t('users.table.email') }}</th>
+              <th class="text-xs font-medium text-base-content/50">{{ t('users.table.roles') }}</th>
+              <th class="text-xs font-medium text-base-content/50">{{ t('users.table.quota') }}</th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('users.table.status') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('users.table.created') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50 w-20">
+                {{ t('users.table.actions') }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -271,7 +283,9 @@ import { formatDate } from '@/utils/format'
               </td>
             </tr>
             <tr v-else-if="!filteredUsers.length">
-              <td colspan="6" class="text-center py-12 text-base-content/50">No users found</td>
+              <td colspan="6" class="text-center py-12 text-base-content/50">
+                {{ t('common.noData') }}
+              </td>
             </tr>
             <tr v-for="user in filteredUsers" :key="user.id" class="hover border-base-200">
               <td>
@@ -341,7 +355,7 @@ import { formatDate } from '@/utils/format'
                     user.isActive ? 'bg-success/10 text-success' : 'bg-error/10 text-error',
                   ]"
                 >
-                  {{ user.isActive ? 'Active' : 'Inactive' }}
+                  {{ user.isActive ? t('users.active') : t('users.inactive') }}
                 </span>
               </td>
               <td class="text-sm text-base-content/60">{{ formatDate(user.createdAt) }}</td>
@@ -418,11 +432,13 @@ import { formatDate } from '@/utils/format'
     <!-- Create Modal -->
     <dialog :class="['modal', { 'modal-open': showCreateModal }]">
       <div class="modal-box max-w-lg">
-        <h3 class="font-semibold text-lg mb-4">Create New User</h3>
+        <h3 class="font-semibold text-lg mb-4">{{ t('users.modal.createTitle') }}</h3>
         <form @submit.prevent="handleCreate" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">First Name *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.firstName') }} *
+              </label>
               <input
                 v-model="formData.firstName"
                 type="text"
@@ -431,7 +447,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Last Name *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.lastName') }} *
+              </label>
               <input
                 v-model="formData.lastName"
                 type="text"
@@ -440,7 +458,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Username *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.username') }} *
+              </label>
               <input
                 v-model="formData.username"
                 type="text"
@@ -449,7 +469,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Email *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.email') }} *
+              </label>
               <input
                 v-model="formData.email"
                 type="email"
@@ -458,7 +480,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Phone</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.phone') }}
+              </label>
               <input
                 v-model="formData.phoneNumber"
                 type="tel"
@@ -466,7 +490,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Date of Birth</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.dob') }}
+              </label>
               <input
                 v-model="formData.dateOfBirth"
                 type="date"
@@ -480,7 +506,7 @@ import { formatDate } from '@/utils/format'
               class="btn btn-ghost btn-sm rounded-lg"
               @click="showCreateModal = false"
             >
-              Cancel
+              {{ t('actions.cancel') }}
             </button>
             <button
               type="submit"
@@ -488,7 +514,7 @@ import { formatDate } from '@/utils/format'
               :disabled="usersStore.isLoading"
             >
               <span v-if="usersStore.isLoading" class="loading loading-spinner loading-xs"></span>
-              Create
+              {{ t('actions.create') }}
             </button>
           </div>
         </form>
@@ -501,11 +527,13 @@ import { formatDate } from '@/utils/format'
     <!-- Edit Modal -->
     <dialog :class="['modal', { 'modal-open': showEditModal }]">
       <div class="modal-box max-w-lg">
-        <h3 class="font-semibold text-lg mb-4">Edit User</h3>
+        <h3 class="font-semibold text-lg mb-4">{{ t('users.modal.editTitle') }}</h3>
         <form @submit.prevent="handleUpdate" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">First Name *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.firstName') }} *
+              </label>
               <input
                 v-model="editFormData.firstName"
                 type="text"
@@ -514,7 +542,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Last Name *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.lastName') }} *
+              </label>
               <input
                 v-model="editFormData.lastName"
                 type="text"
@@ -523,7 +553,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Username *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.username') }} *
+              </label>
               <input
                 v-model="editFormData.username"
                 type="text"
@@ -532,7 +564,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Email *</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.email') }} *
+              </label>
               <input
                 v-model="editFormData.email"
                 type="email"
@@ -541,7 +575,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Phone</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.phone') }}
+              </label>
               <input
                 v-model="editFormData.phoneNumber"
                 type="tel"
@@ -549,7 +585,9 @@ import { formatDate } from '@/utils/format'
               />
             </div>
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Date of Birth</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">
+                {{ t('users.modal.dob') }}
+              </label>
               <input
                 v-model="editFormData.dateOfBirth"
                 type="date"
@@ -563,7 +601,7 @@ import { formatDate } from '@/utils/format'
               type="checkbox"
               class="toggle toggle-sm toggle-primary"
             />
-            <span class="text-sm">Active</span>
+            <span class="text-sm">{{ t('users.active') }}</span>
           </div>
           <div class="flex justify-end gap-2 pt-2">
             <button
@@ -571,7 +609,7 @@ import { formatDate } from '@/utils/format'
               class="btn btn-ghost btn-sm rounded-lg"
               @click="showEditModal = false"
             >
-              Cancel
+              {{ t('actions.cancel') }}
             </button>
             <button
               type="submit"
@@ -579,7 +617,7 @@ import { formatDate } from '@/utils/format'
               :disabled="usersStore.isLoading"
             >
               <span v-if="usersStore.isLoading" class="loading loading-spinner loading-xs"></span>
-              Save
+              {{ t('actions.save') }}
             </button>
           </div>
         </form>
@@ -592,14 +630,15 @@ import { formatDate } from '@/utils/format'
     <!-- Delete Modal -->
     <dialog :class="['modal', { 'modal-open': showDeleteModal }]">
       <div class="modal-box max-w-sm">
-        <h3 class="font-semibold text-lg">Delete User</h3>
+        <h3 class="font-semibold text-lg">{{ t('users.modal.deleteTitle') }}</h3>
         <p class="py-4 text-sm text-base-content/70">
-          Are you sure you want to delete <strong>{{ userToDelete?.username }}</strong
-          >? This action cannot be undone.
+          <span
+            v-html="t('users.modal.deleteMessage', { username: userToDelete?.username })"
+          ></span>
         </p>
         <div class="flex justify-end gap-2">
           <button class="btn btn-ghost btn-sm rounded-lg" @click="showDeleteModal = false">
-            Cancel
+            {{ t('actions.cancel') }}
           </button>
           <button
             class="btn btn-error btn-sm rounded-lg"
@@ -607,7 +646,7 @@ import { formatDate } from '@/utils/format'
             :disabled="usersStore.isLoading"
           >
             <span v-if="usersStore.isLoading" class="loading loading-spinner loading-xs"></span>
-            Delete
+            {{ t('actions.delete') }}
           </button>
         </div>
       </div>
@@ -638,9 +677,9 @@ import { formatDate } from '@/utils/format'
             </svg>
           </div>
           <div>
-            <h3 class="font-semibold text-lg">Assign Role</h3>
+            <h3 class="font-semibold text-lg">{{ t('users.modal.assignRole') }}</h3>
             <p class="text-xs text-base-content/60">
-              for
+              {{ t('users.modal.roleFor') }}
               <span class="font-medium text-base-content">{{ selectedUserForRole?.username }}</span>
             </p>
           </div>
@@ -648,7 +687,7 @@ import { formatDate } from '@/utils/format'
 
         <!-- Current Roles -->
         <div v-if="selectedUserForRole?.roles?.length" class="mb-4 p-3 bg-base-200/50 rounded-lg">
-          <p class="text-xs text-base-content/60 mb-2">Current roles:</p>
+          <p class="text-xs text-base-content/60 mb-2">{{ t('users.modal.currentRoles') }}</p>
           <div class="flex flex-wrap gap-1.5">
             <span
               v-for="role in selectedUserForRole.roles"
@@ -663,11 +702,11 @@ import { formatDate } from '@/utils/format'
         <!-- Role Selection Cards -->
         <div class="space-y-2 mb-5">
           <p class="text-xs font-medium text-base-content/60 uppercase tracking-wider">
-            Select a role to assign
+            {{ t('users.modal.selectRole') }}
           </p>
           <div v-if="!availableRoles.length" class="text-center py-6 text-base-content/50">
             <span class="loading loading-spinner loading-sm"></span>
-            <p class="mt-2 text-sm">Loading roles...</p>
+            <p class="mt-2 text-sm">{{ t('users.modal.loadingRoles') }}</p>
           </div>
           <div v-else class="space-y-2 max-h-60 overflow-y-auto pr-1">
             <label
@@ -690,7 +729,7 @@ import { formatDate } from '@/utils/format'
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-sm">{{ role.name }}</p>
                 <p class="text-xs text-base-content/60 mt-0.5">
-                  {{ role.description || 'No description' }}
+                  {{ role.description || t('users.modal.noDescription') }}
                 </p>
               </div>
             </label>
@@ -700,7 +739,7 @@ import { formatDate } from '@/utils/format'
         <!-- Actions -->
         <div class="flex justify-end gap-2 pt-2 border-t border-base-200">
           <button class="btn btn-ghost btn-sm rounded-lg" @click="showRoleModal = false">
-            Cancel
+            {{ t('actions.cancel') }}
           </button>
           <button
             class="btn btn-primary btn-sm rounded-lg"
@@ -708,7 +747,7 @@ import { formatDate } from '@/utils/format'
             :disabled="usersStore.isLoading || !roleToAssign"
           >
             <span v-if="usersStore.isLoading" class="loading loading-spinner loading-xs"></span>
-            Assign Role
+            {{ t('users.modal.assignRole') }}
           </button>
         </div>
       </div>

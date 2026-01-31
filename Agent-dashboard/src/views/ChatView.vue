@@ -172,7 +172,7 @@ function renderMessageContent(content: string) {
       class="flex-none h-14 px-6 border-b border-base-200 flex items-center justify-between bg-base-100/90 backdrop-blur-sm z-10 sticky top-0"
     >
       <div class="flex items-center gap-3">
-        <h2 class="font-semibold text-sm text-base-content">AI Assistant</h2>
+        <h2 class="font-semibold text-sm text-base-content">{{ t('chat.header') }}</h2>
         <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10">
           <span class="relative flex h-1.5 w-1.5">
             <span
@@ -180,7 +180,7 @@ function renderMessageContent(content: string) {
             ></span>
             <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
           </span>
-          <span class="text-[10px] text-success font-medium">Online</span>
+          <span class="text-[10px] text-success font-medium">{{ t('chat.online') }}</span>
         </div>
       </div>
 
@@ -197,12 +197,12 @@ function renderMessageContent(content: string) {
       <div class="w-16 h-16 rounded-2xl bg-base-200 flex items-center justify-center mb-4">
         <AppIcon name="user" class="w-6 h-6 text-base-content/40" />
       </div>
-      <h3 class="text-lg font-semibold mb-2 text-base-content">Sign in to chat</h3>
+      <h3 class="text-lg font-semibold mb-2 text-base-content">{{ t('chat.signIn.title') }}</h3>
       <p class="text-base-content/60 mb-6 text-center max-w-xs text-sm">
-        Connect to your account to save your history.
+        {{ t('chat.signIn.subtitle') }}
       </p>
       <button @click="handleLogin" class="btn btn-neutral btn-sm rounded-lg px-6 font-medium">
-        Sign In
+        {{ t('chat.signIn.button') }}
       </button>
     </div>
 
@@ -223,29 +223,36 @@ function renderMessageContent(content: string) {
             </div>
 
             <h3 class="text-xl font-medium mb-2 text-base-content">
-              Good
               {{
                 new Date().getHours() < 12
-                  ? 'morning'
+                  ? t('chat.welcome.morning')
                   : new Date().getHours() < 18
-                    ? 'afternoon'
-                    : 'evening'
+                    ? t('chat.welcome.afternoon')
+                    : t('chat.welcome.evening')
               }}, {{ authStore.user?.profile?.name?.split(' ')[0] || 'User' }}
             </h3>
             <p class="text-base-content/60 max-w-sm mx-auto mb-10 text-sm">
-              How can I help you today?
+              {{ t('chat.welcome.help') }}
             </p>
 
             <div class="grid grid-cols-2 gap-2 w-full max-w-[400px]">
               <button
                 v-for="(action, idx) in [
-                  { icon: 'chart-bar', label: 'Analyze trends' },
-                  { icon: 'document-text', label: 'Draft a report' },
-                  { icon: 'code-bracket', label: 'Explain code' },
-                  { icon: 'light-bulb', label: 'Brainstorm ideas' },
+                  { icon: 'chart-bar', label: t('chat.actions.analyze'), text: 'Analyze trends' },
+                  {
+                    icon: 'document-text',
+                    label: t('chat.actions.report'),
+                    text: 'Draft a report',
+                  },
+                  { icon: 'code-bracket', label: t('chat.actions.code'), text: 'Explain code' },
+                  {
+                    icon: 'light-bulb',
+                    label: t('chat.actions.brainstorm'),
+                    text: 'Brainstorm ideas',
+                  },
                 ]"
                 :key="idx"
-                @click="setQuickAction(action.label)"
+                @click="setQuickAction(action.text)"
                 class="group p-3 text-left bg-transparent hover:bg-base-200 rounded-xl border border-base-300 hover:border-base-content/20 transition-all flex items-center gap-3"
               >
                 <AppIcon
@@ -364,7 +371,7 @@ function renderMessageContent(content: string) {
                   }
                 "
                 class="block w-full bg-transparent border-0 focus:ring-0 p-3 min-h-[44px] max-h-[150px] resize-none text-base-content placeholder:text-base-content/40 custom-scrollbar text-sm leading-relaxed"
-                :placeholder="t('chat.placeholder', 'Message AI Assistant...')"
+                :placeholder="t('chat.input.placeholder')"
                 :disabled="isLoading"
                 rows="1"
               ></textarea>
@@ -428,7 +435,7 @@ function renderMessageContent(content: string) {
           </div>
 
           <p class="text-[10px] text-center text-base-content/40 mt-3 font-medium">
-            AI can make mistakes. Please check important info.
+            {{ t('chat.input.disclaimer') }}
           </p>
         </div>
       </div>

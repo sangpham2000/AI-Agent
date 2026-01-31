@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { watch, computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
+import AppLogo from '@/components/ui/AppLogo.vue'
 
 const props = defineProps<{
   isCollapsed: boolean
@@ -12,6 +14,8 @@ const emit = defineEmits<{
   toggleCollapse: []
   closeMobile: []
 }>()
+
+const { t } = useI18n()
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -37,33 +41,33 @@ interface MenuGroup {
   items: MenuItem[]
 }
 
-const allMenuGroups: MenuGroup[] = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    items: [
-      { name: 'Dashboard', path: '/dashboard', icon: 'home' },
-      { name: 'Analytics', path: '/dashboard/analytics', icon: 'chart' },
-    ],
-  },
-  {
-    id: 'management',
-    label: 'Management',
-    items: [
-      { name: 'Users', path: '/dashboard/users', icon: 'users' },
-      { name: 'Roles & Permissions', path: '/dashboard/roles', icon: 'lock' },
-      { name: 'Documents', path: '/dashboard/documents', icon: 'document' },
-      { name: 'Conversations', path: '/dashboard/conversations', icon: 'chat' },
-    ],
-  },
-  {
-    id: 'tools',
-    label: 'Tools',
-    items: [{ name: 'Chat Demo', path: '/chat', icon: 'message', badge: 'Live' }],
-  },
-]
-
 const menuGroups = computed(() => {
+  const allMenuGroups: MenuGroup[] = [
+    {
+      id: 'overview',
+      label: t('sidebar.overview'),
+      items: [
+        { name: t('sidebar.dashboard'), path: '/dashboard', icon: 'home' },
+        { name: t('sidebar.analytics'), path: '/dashboard/analytics', icon: 'chart' },
+      ],
+    },
+    {
+      id: 'management',
+      label: t('sidebar.management'),
+      items: [
+        { name: t('sidebar.users'), path: '/dashboard/users', icon: 'users' },
+        { name: t('sidebar.roles'), path: '/dashboard/roles', icon: 'lock' },
+        { name: t('sidebar.documents'), path: '/dashboard/documents', icon: 'document' },
+        { name: t('sidebar.conversations'), path: '/dashboard/conversations', icon: 'chat' },
+      ],
+    },
+    {
+      id: 'tools',
+      label: t('sidebar.tools'),
+      items: [{ name: t('sidebar.chatDemo'), path: '/chat', icon: 'message', badge: 'Live' }],
+    },
+  ]
+
   if (authStore.isAdmin) return allMenuGroups
   // Non-admin only sees Tools (Chat)
   return allMenuGroups.filter((g) => g.id === 'tools')
@@ -112,16 +116,7 @@ const icons: Record<string, string> = {
     <div class="h-16 flex items-center px-4 border-b border-base-200 flex-shrink-0">
       <RouterLink to="/" class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4 text-primary-content"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+          <AppLogo class="h-4 w-4 text-primary-content" />
         </div>
         <span v-if="!isCollapsed" class="font-semibold text-base">SA AI Dashboard</span>
       </RouterLink>
@@ -153,6 +148,7 @@ const icons: Record<string, string> = {
             :title="isCollapsed ? item.name : undefined"
             :class="[
               'group flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-all duration-150',
+              isCollapsed ? 'justify-center' : '',
               isActive(item.path)
                 ? 'bg-primary/10 text-primary'
                 : 'text-base-content/70 hover:bg-base-200 hover:text-base-content',

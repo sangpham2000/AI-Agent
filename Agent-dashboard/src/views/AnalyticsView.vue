@@ -2,7 +2,10 @@
 import { onMounted, computed, ref } from 'vue'
 import { useAnalyticsStore } from '@/stores/analytics'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { useI18n } from 'vue-i18n'
+import { formatDate } from '@/utils/format'
 
+const { t } = useI18n()
 const analyticsStore = useAnalyticsStore()
 
 const trendDays = ref(30)
@@ -40,7 +43,7 @@ const avgMessagesPerDay = computed(() => {
   return Math.round(weeks.reduce((a, b) => a + b, 0) / weeks.length)
 })
 
-const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] // Should ideally be localized too, but for chart labels keep simple for now or use toLocaleDateString approach if needed.
 const maxMessages = computed(() => Math.max(...analyticsStore.messagesThisWeek, 1))
 const maxTrend = computed(() =>
   Math.max(...analyticsStore.conversationTrends.map((t) => t.count), 1),
@@ -63,8 +66,6 @@ async function changeQuestionLimit(limit: number) {
   questionLimit.value = limit
   await analyticsStore.fetchPopularQuestions(limit)
 }
-
-import { formatDate } from '@/utils/format'
 </script>
 
 <template>
@@ -72,24 +73,36 @@ import { formatDate } from '@/utils/format'
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Analytics Dashboard</h1>
+        <h1 class="text-xl font-semibold">{{ t('analytics.title') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-          Detailed insights into your AI Agent performance.
+          {{ t('analytics.subtitle') }}
         </p>
       </div>
       <div class="flex gap-2">
         <div class="dropdown dropdown-end">
           <button tabindex="0" class="btn btn-ghost btn-sm rounded-lg gap-2">
-            Last {{ trendDays }} days
+            {{ t('analytics.lastDays', { count: trendDays }) }}
             <AppIcon name="chevron-down" class="w-4 h-4" />
           </button>
           <ul
             tabindex="0"
             class="dropdown-content menu p-1.5 bg-base-100 rounded-xl shadow-lg border border-base-200 w-36 mt-1"
           >
-            <li><a class="text-sm rounded-lg" @click="changeTrendDays(7)">Last 7 days</a></li>
-            <li><a class="text-sm rounded-lg" @click="changeTrendDays(14)">Last 14 days</a></li>
-            <li><a class="text-sm rounded-lg" @click="changeTrendDays(30)">Last 30 days</a></li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeTrendDays(7)">{{
+                t('analytics.lastDays', { count: 7 })
+              }}</a>
+            </li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeTrendDays(14)">{{
+                t('analytics.lastDays', { count: 14 })
+              }}</a>
+            </li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeTrendDays(30)">{{
+                t('analytics.lastDays', { count: 30 })
+              }}</a>
+            </li>
           </ul>
         </div>
         <button
@@ -102,7 +115,7 @@ import { formatDate } from '@/utils/format'
             class="w-4 h-4"
             :class="{ 'animate-spin': analyticsStore.isLoading }"
           />
-          Refresh
+          {{ t('analytics.refresh') }}
         </button>
       </div>
     </div>
@@ -111,7 +124,9 @@ import { formatDate } from '@/utils/format'
     <div v-if="analyticsStore.error" class="alert alert-error text-sm py-3 rounded-xl shadow-sm">
       <AppIcon name="exclamation" class="w-5 h-5" />
       <span>{{ analyticsStore.error }}</span>
-      <button class="btn btn-ghost btn-xs" @click="analyticsStore.clearError()">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="analyticsStore.clearError()">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
 
     <!-- Key Metrics -->
@@ -119,15 +134,15 @@ import { formatDate } from '@/utils/format'
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="chat" class="w-3.5 h-3.5" />
-          Total Conversations
+          {{ t('analytics.totalConversations') }}
         </p>
         <p class="text-2xl font-bold">{{ formatCompact(analyticsStore.totalConversations) }}</p>
-        <p class="text-xs text-base-content/40 mt-1">All time</p>
+        <p class="text-xs text-base-content/40 mt-1">{{ t('analytics.allTime') }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="calendar" class="w-3.5 h-3.5" />
-          Today's Conversations
+          {{ t('analytics.todaysConversations') }}
         </p>
         <p class="text-2xl font-bold">{{ formatNumber(analyticsStore.conversationsToday) }}</p>
         <p class="text-xs text-success mt-1">+12% vs yesterday</p>
@@ -135,18 +150,22 @@ import { formatDate } from '@/utils/format'
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="mail" class="w-3.5 h-3.5" />
-          Messages This Week
+          {{ t('analytics.messagesThisWeek') }}
         </p>
         <p class="text-2xl font-bold">{{ formatCompact(totalMessagesThisWeek) }}</p>
-        <p class="text-xs text-base-content/40 mt-1">~{{ avgMessagesPerDay }}/day avg</p>
+        <p class="text-xs text-base-content/40 mt-1">
+          {{ t('analytics.avgPerDay', { count: avgMessagesPerDay }) }}
+        </p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="users" class="w-3.5 h-3.5" />
-          Active Users
+          {{ t('analytics.activeUsers') }}
         </p>
         <p class="text-2xl font-bold">{{ formatNumber(analyticsStore.activeUsers) }}</p>
-        <p class="text-xs text-base-content/40 mt-1">of {{ analyticsStore.totalUsers }} total</p>
+        <p class="text-xs text-base-content/40 mt-1">
+          {{ t('analytics.totalUsers', { count: analyticsStore.totalUsers }) }}
+        </p>
       </div>
     </div>
 
@@ -157,9 +176,11 @@ import { formatDate } from '@/utils/format'
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="trending-up" class="w-4 h-4 text-primary" />
-            Conversation Trends
+            {{ t('analytics.conversationTrends') }}
           </h3>
-          <span class="badge badge-sm badge-primary badge-outline">{{ trendDays }} days</span>
+          <span class="badge badge-sm badge-primary badge-outline">{{
+            t('analytics.lastDays', { count: trendDays })
+          }}</span>
         </div>
         <div v-if="analyticsStore.isLoading" class="h-48 flex items-center justify-center">
           <span class="loading loading-spinner loading-md text-primary"></span>
@@ -186,7 +207,7 @@ import { formatDate } from '@/utils/format'
           v-if="!analyticsStore.isLoading && !analyticsStore.conversationTrends.length"
           class="h-48 flex items-center justify-center text-base-content/40 text-sm"
         >
-          No trend data available
+          {{ t('analytics.noData') }}
         </div>
       </div>
 
@@ -195,9 +216,11 @@ import { formatDate } from '@/utils/format'
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="chat-alt" class="w-4 h-4 text-secondary" />
-            Daily Messages
+            {{ t('analytics.dailyMessages') }}
           </h3>
-          <span class="badge badge-sm badge-secondary badge-outline">{{ trendDays }} days</span>
+          <span class="badge badge-sm badge-secondary badge-outline">{{
+            t('analytics.lastDays', { count: trendDays })
+          }}</span>
         </div>
         <div v-if="analyticsStore.isLoading" class="h-48 flex items-center justify-center">
           <span class="loading loading-spinner loading-md text-secondary"></span>
@@ -224,7 +247,7 @@ import { formatDate } from '@/utils/format'
           v-if="!analyticsStore.isLoading && !analyticsStore.dailyMessageCounts.length"
           class="h-48 flex items-center justify-center text-base-content/40 text-sm"
         >
-          No message data available
+          {{ t('analytics.noData') }}
         </div>
       </div>
     </div>
@@ -235,7 +258,7 @@ import { formatDate } from '@/utils/format'
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="globe-alt" class="w-4 h-4 text-info" />
-          Conversations by Platform
+          {{ t('analytics.platformDistribution') }}
         </h3>
         <div v-if="analyticsStore.isLoading" class="space-y-3">
           <div v-for="i in 3" :key="i" class="h-10 bg-base-200 rounded-lg animate-pulse"></div>
@@ -286,7 +309,7 @@ import { formatDate } from '@/utils/format'
             v-if="!analyticsStore.platformDistribution.length"
             class="text-center py-8 text-base-content/40 text-sm"
           >
-            No platform data available
+            {{ t('analytics.noData') }}
           </div>
         </div>
       </div>
@@ -296,9 +319,11 @@ import { formatDate } from '@/utils/format'
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="calendar" class="w-4 h-4 text-accent" />
-            Weekly Message Pattern
+            {{ t('analytics.weeklyPattern') }}
           </h3>
-          <span class="badge badge-sm badge-accent badge-outline">This week</span>
+          <span class="badge badge-sm badge-accent badge-outline">{{
+            t('analytics.thisWeek') || 'This week'
+          }}</span>
         </div>
         <div class="h-40 flex items-end justify-between gap-2">
           <div
@@ -322,20 +347,32 @@ import { formatDate } from '@/utils/format'
       <div class="flex items-center justify-between mb-4">
         <h3 class="font-semibold flex items-center gap-2">
           <AppIcon name="question-mark-circle" class="w-4 h-4 text-warning" />
-          Popular Questions
+          {{ t('analytics.popularQuestions') }}
         </h3>
         <div class="dropdown dropdown-end">
           <button tabindex="0" class="btn btn-ghost btn-xs gap-1">
-            Top {{ questionLimit }}
+            {{ t('analytics.topQuestions', { count: questionLimit }) }}
             <AppIcon name="chevron-down" class="w-3 h-3" />
           </button>
           <ul
             tabindex="0"
             class="dropdown-content menu p-1.5 bg-base-100 rounded-xl shadow-lg border border-base-200 w-28"
           >
-            <li><a class="text-sm rounded-lg" @click="changeQuestionLimit(5)">Top 5</a></li>
-            <li><a class="text-sm rounded-lg" @click="changeQuestionLimit(10)">Top 10</a></li>
-            <li><a class="text-sm rounded-lg" @click="changeQuestionLimit(20)">Top 20</a></li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeQuestionLimit(5)">{{
+                t('analytics.topQuestions', { count: 5 })
+              }}</a>
+            </li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeQuestionLimit(10)">{{
+                t('analytics.topQuestions', { count: 10 })
+              }}</a>
+            </li>
+            <li>
+              <a class="text-sm rounded-lg" @click="changeQuestionLimit(20)">{{
+                t('analytics.topQuestions', { count: 20 })
+              }}</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -345,9 +382,15 @@ import { formatDate } from '@/utils/format'
           <thead>
             <tr class="border-base-200 bg-base-50/50">
               <th class="text-xs font-medium text-base-content/50 w-12 pl-4">#</th>
-              <th class="text-xs font-medium text-base-content/50">Question</th>
-              <th class="text-xs font-medium text-base-content/50 w-20 text-right">Count</th>
-              <th class="text-xs font-medium text-base-content/50 w-28 pr-4">Last Asked</th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('analytics.table.question') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50 w-20 text-right">
+                {{ t('analytics.table.count') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50 w-28 pr-4">
+                {{ t('analytics.table.lastAsked') }}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -358,7 +401,7 @@ import { formatDate } from '@/utils/format'
             </tr>
             <tr v-else-if="!analyticsStore.popularQuestions.length">
               <td colspan="4" class="text-center py-8 text-base-content/40 text-sm">
-                No questions recorded yet
+                {{ t('analytics.noData') }}
               </td>
             </tr>
             <tr
@@ -400,7 +443,7 @@ import { formatDate } from '@/utils/format'
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="document-text" class="w-4 h-4" />
-          Document Processing
+          {{ t('analytics.documentProcessing') }}
         </h3>
         <div class="flex flex-col items-center">
           <div
@@ -425,14 +468,14 @@ import { formatDate } from '@/utils/format'
           <p class="mt-3 text-sm font-medium">
             {{ analyticsStore.documentsProcessed }} / {{ analyticsStore.totalDocuments }}
           </p>
-          <p class="text-xs text-base-content/50">Documents Processed</p>
+          <p class="text-xs text-base-content/50">{{ t('analytics.documentsProcessed') }}</p>
         </div>
       </div>
 
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="user-group" class="w-4 h-4" />
-          User Activity
+          {{ t('analytics.userActivity') }}
         </h3>
         <div class="flex flex-col items-center">
           <div
@@ -455,14 +498,14 @@ import { formatDate } from '@/utils/format'
           <p class="mt-3 text-sm font-medium">
             {{ analyticsStore.activeUsers }} / {{ analyticsStore.totalUsers }}
           </p>
-          <p class="text-xs text-base-content/50">Active Users</p>
+          <p class="text-xs text-base-content/50">{{ t('analytics.activeUsers') }}</p>
         </div>
       </div>
 
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200/50">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="lightning-bolt" class="w-4 h-4" />
-          Avg Response Time
+          {{ t('analytics.avgResponseTime') }}
         </h3>
         <div class="flex flex-col items-center">
           <p class="text-4xl font-bold text-accent">1.2s</p>
@@ -470,7 +513,7 @@ import { formatDate } from '@/utils/format'
             class="flex items-center gap-1 mt-3 text-success text-sm bg-success/10 px-2 py-1 rounded-lg"
           >
             <AppIcon name="trending-up" class="w-3.5 h-3.5" />
-            <span>15% faster</span>
+            <span>{{ t('analytics.fasterVsLastWeek', { percent: 15 }) }}</span>
           </div>
           <p class="text-xs text-base-content/50 mt-1">vs last week</p>
         </div>

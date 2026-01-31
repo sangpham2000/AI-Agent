@@ -28,7 +28,7 @@ const activeLocale = computed(
       class="btn btn-ghost btn-sm btn-square rounded-lg group"
       title="Change Language"
     >
-      <AppIcon name="translate" class="w-[18px] h-[18px]" />
+      <AppIcon name="globe-alt" class="w-[18px] h-[18px]" />
     </button>
     <ul
       tabindex="0"

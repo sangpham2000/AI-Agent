@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useConversationsStore } from '@/stores/conversations'
 import type { ConversationSummary, ConversationDetail } from '@/api'
 import MarkdownIt from 'markdown-it'
+import AppIcon from '@/components/ui/AppIcon.vue'
 
+const { t } = useI18n()
 const md = new MarkdownIt({
   html: false,
   breaks: true,
@@ -105,8 +108,8 @@ function renderMessageContent(content: string) {
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Conversation Logs</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">View and analyze conversation history.</p>
+        <h1 class="text-xl font-semibold">{{ t('conversations.title') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ t('conversations.subtitle') }}</p>
       </div>
       <button
         class="btn btn-ghost btn-sm gap-1.5 rounded-lg"
@@ -127,28 +130,34 @@ function renderMessageContent(content: string) {
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
           />
         </svg>
-        {{ conversationsStore.isExporting ? 'Exporting...' : 'Export' }}
+        {{
+          conversationsStore.isExporting ? t('conversations.exporting') : t('conversations.export')
+        }}
       </button>
     </div>
 
     <!-- Alerts -->
     <div v-if="conversationsStore.error" class="alert alert-error text-sm py-3">
       <span>{{ conversationsStore.error }}</span>
-      <button class="btn btn-ghost btn-xs" @click="conversationsStore.clearError()">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="conversationsStore.clearError()">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
 
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-4">
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">Total Conversations</p>
+        <p class="text-xs text-base-content/50 mb-1">
+          {{ t('conversations.totalConversations') }}
+        </p>
         <p class="text-2xl font-bold">{{ conversationsStore.totalCount }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">Total Messages</p>
+        <p class="text-xs text-base-content/50 mb-1">{{ t('conversations.totalMessages') }}</p>
         <p class="text-2xl font-bold">{{ conversationsStore.totalMessages }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">Avg Messages/Conv</p>
+        <p class="text-xs text-base-content/50 mb-1">{{ t('conversations.avgMessages') }}</p>
         <p class="text-2xl font-bold">
           {{ conversationsStore.averageMessagesPerConversation.toFixed(1) }}
         </p>
@@ -176,7 +185,7 @@ function renderMessageContent(content: string) {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Search conversations..."
+            :placeholder="t('conversations.searchPlaceholder')"
             class="input input-sm w-full pl-9 bg-base-200/50 border-0 rounded-lg"
           />
         </div>
@@ -184,7 +193,7 @@ function renderMessageContent(content: string) {
           v-model="platformFilter"
           class="select select-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
         >
-          <option value="">All Platforms</option>
+          <option value="">{{ t('conversations.allPlatforms') }}</option>
           <option value="web">Web</option>
           <option value="telegram">Telegram</option>
           <option value="api">API</option>
@@ -193,13 +202,13 @@ function renderMessageContent(content: string) {
           v-model="dateFrom"
           type="date"
           class="input input-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
-          placeholder="From"
+          :placeholder="t('conversations.from')"
         />
         <input
           v-model="dateTo"
           type="date"
           class="input input-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
-          placeholder="To"
+          :placeholder="t('conversations.to')"
         />
       </div>
     </div>
@@ -210,11 +219,21 @@ function renderMessageContent(content: string) {
         <table class="table">
           <thead>
             <tr class="border-base-200">
-              <th class="text-xs font-medium text-base-content/50">User / Session</th>
-              <th class="text-xs font-medium text-base-content/50">Platform</th>
-              <th class="text-xs font-medium text-base-content/50">Messages</th>
-              <th class="text-xs font-medium text-base-content/50">Status</th>
-              <th class="text-xs font-medium text-base-content/50">Started</th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('conversations.table.userSession') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('conversations.table.platform') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('conversations.table.messages') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('conversations.table.status') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('conversations.table.started') }}
+              </th>
               <th class="text-xs font-medium text-base-content/50 w-16"></th>
             </tr>
           </thead>
@@ -226,7 +245,7 @@ function renderMessageContent(content: string) {
             </tr>
             <tr v-else-if="!paginatedConversations.length">
               <td colspan="6" class="text-center py-12 text-base-content/50">
-                No conversations found
+                {{ t('common.noData') }}
               </td>
             </tr>
             <tr
@@ -316,8 +335,10 @@ function renderMessageContent(content: string) {
         class="p-3 border-t border-base-200 flex items-center justify-between"
       >
         <p class="text-xs text-base-content/50">
-          Showing {{ (currentPage - 1) * pageSize + 1 }} to
-          {{ Math.min(currentPage * pageSize, filteredConversations.length) }} of
+          {{ t('common.showing') }} {{ (currentPage - 1) * pageSize + 1 }}
+          {{ t('common.to') }}
+          {{ Math.min(currentPage * pageSize, filteredConversations.length) }}
+          {{ t('common.of') }}
           {{ filteredConversations.length }}
         </p>
         <div class="join">
@@ -359,7 +380,7 @@ function renderMessageContent(content: string) {
               >
                 <div>
                   <h2 class="text-lg font-semibold text-base-content">
-                    {{ selectedConversation?.title || 'Conversation Detail' }}
+                    {{ selectedConversation?.title || t('conversations.detail.title') }}
                   </h2>
                   <div class="flex items-center gap-2 mt-1">
                     <span class="text-xs text-base-content/50"
@@ -426,7 +447,7 @@ function renderMessageContent(content: string) {
                       <p
                         class="text-[10px] text-base-content/40 uppercase font-semibold tracking-wider mb-0.5"
                       >
-                        Summary
+                        {{ t('conversations.detail.summary') }}
                       </p>
                       <div class="flex items-center gap-2 justify-end text-sm font-medium">
                         <span
@@ -455,75 +476,66 @@ function renderMessageContent(content: string) {
                     <div
                       v-for="(message, idx) in selectedConversation.messages"
                       :key="idx"
-                      class="chat"
-                      :class="message.role === 'user' ? 'chat-end' : 'chat-start'"
+                      class="group w-full max-w-3xl mx-auto"
                     >
-                      <!-- Avatar -->
-                      <div class="chat-image avatar">
+                      <div
+                        class="flex gap-4 p-2 rounded-xl transition-colors hover:bg-base-200/50"
+                        :class="message.role === 'user' ? 'flex-row-reverse' : 'flex-row'"
+                      >
+                        <!-- Avatar -->
                         <div
-                          class="w-8 h-8 rounded-full flex items-center justify-center shadow-sm"
+                          class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5"
                           :class="
                             message.role === 'user'
-                              ? 'bg-primary text-primary-content'
-                              : 'bg-base-300 text-base-content'
+                              ? 'bg-base-200'
+                              : 'bg-transparent border border-base-200'
                           "
                         >
-                          <svg
+                          <span
                             v-if="message.role === 'user'"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                            class="text-[10px] font-medium text-base-content/60"
+                            >{{ t('conversations.detail.user') }}</span
                           >
-                            <path
-                              fill-rule="evenodd"
-                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                          <svg
-                            v-else
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l-.9.9a2 2 0 01-2.9 0l-.9-.9H5a2 2 0 01-2-2V5zm5 11l.9.9a.6.6 0 00.9 0l.9-.9H15a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h5z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
+                          <AppIcon v-else name="sparkles" class="w-4 h-4 text-base-content" />
                         </div>
-                      </div>
 
-                      <!-- Header -->
-                      <div
-                        class="chat-header text-xs text-base-content/40 mb-1 flex items-center gap-1"
-                      >
-                        <span class="font-semibold text-base-content/70">{{
-                          message.role === 'user' ? 'User' : 'Assistant'
-                        }}</span>
-                        <time class="opacity-50 text-[10px]">{{
-                          formatDate(message.createdAt)
-                        }}</time>
-                      </div>
-
-                      <!-- Bubble -->
-                      <div
-                        class="chat-bubble shadow-sm text-sm"
-                        :class="[
-                          message.role === 'user'
-                            ? 'chat-bubble-primary bg-primary text-primary-content rounded-tr-sm'
-                            : 'bg-base-200 text-base-content rounded-tl-sm',
-                        ]"
-                      >
-                        <!-- Render Markdown here -->
+                        <!-- Content -->
                         <div
-                          v-html="renderMessageContent(message.content)"
-                          class="markdown-body prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0.5"
-                          :class="{ 'prose-invert': message.role === 'user' }"
-                        ></div>
+                          class="flex flex-col gap-1 min-w-0 max-w-[85%]"
+                          :class="message.role === 'user' ? 'items-end' : 'items-start'"
+                        >
+                          <div class="flex items-center gap-2 px-1">
+                            <span class="text-xs font-medium text-base-content">
+                              {{
+                                message.role === 'user' ? 'User' : t('conversations.detail.user')
+                              }}
+                            </span>
+                          </div>
+
+                          <div
+                            class="text-sm leading-7"
+                            :class="[
+                              message.role === 'user'
+                                ? 'bg-base-200 px-4 py-2 rounded-2xl rounded-tr-sm text-base-content'
+                                : 'text-base-content px-1',
+                            ]"
+                          >
+                            <!-- Markdown Content -->
+                            <div
+                              v-if="message.role !== 'user'"
+                              class="markdown-body prose prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-code:text-base-content prose-code:bg-base-200 prose-code:px-1 prose-code:rounded prose-code:font-normal prose-pre:bg-base-300 prose-pre:text-base-content"
+                              v-html="renderMessageContent(message.content)"
+                            ></div>
+                            <p v-else class="whitespace-pre-wrap">{{ message.content }}</p>
+                          </div>
+
+                          <!-- Timestamp -->
+                          <div class="px-1">
+                            <time class="text-[10px] opacity-40">{{
+                              formatDate(message.createdAt)
+                            }}</time>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -531,7 +543,7 @@ function renderMessageContent(content: string) {
                       v-if="!selectedConversation.messages?.length"
                       class="text-center py-12 text-base-content/40 italic"
                     >
-                      No messages recorded.
+                      {{ t('conversations.detail.noMessages') }}
                     </div>
                   </div>
                 </template>
@@ -545,23 +557,32 @@ function renderMessageContent(content: string) {
 </template>
 
 <style>
-/* Basic markdown styling fixes if prose is not available or incomplete */
-.markdown-body ul {
+/* Markdown Styles Override using DaisyUI Semantic Colors (Matched with ChatView) */
+:deep(.markdown-body) {
+  font-size: 0.925rem;
+  line-height: 1.6;
+  color: oklch(var(--bc));
+}
+:deep(.markdown-body ul) {
   list-style-type: disc;
   padding-left: 1.5em;
 }
-.markdown-body ol {
+:deep(.markdown-body ol) {
   list-style-type: decimal;
   padding-left: 1.5em;
 }
-.markdown-body p {
-  margin-bottom: 0.5em;
-}
-.markdown-body p:last-child {
-  margin-bottom: 0;
-}
-.chat-bubble-primary .markdown-body a {
+:deep(.markdown-body strong) {
+  font-weight: 600;
   color: inherit;
+}
+:deep(.markdown-body a) {
+  color: oklch(var(--p));
   text-decoration: underline;
+  text-underline-offset: 2px;
+}
+:deep(.markdown-body blockquote) {
+  border-left: 4px solid oklch(var(--nc));
+  color: oklch(var(--bc) / 0.6);
+  padding-left: 1em;
 }
 </style>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { rolesApi } from '@/api/users'
 import type { Role, Permission } from '@/api/types'
 
+const { t } = useI18n()
 const roles = ref<Role[]>([])
 const allPermissions = ref<Permission[]>([])
 const selectedRole = ref<Role | null>(null)
@@ -23,11 +25,12 @@ async function fetchRoles() {
     roles.value = res.data
     // Select first role by default if available
     if (roles.value.length > 0 && !selectedRole.value) {
-      selectRole(roles.value[0])
+      selectRole(roles.value[0]!)
     }
   } catch (error) {
     console.error('Failed to fetch roles', error)
-    errorMessage.value = 'Failed to load roles'
+    console.error('Failed to fetch roles', error)
+    errorMessage.value = t('roles.messages.loadError')
   } finally {
     isLoading.value = false
   }
@@ -39,7 +42,8 @@ async function fetchPermissions() {
     allPermissions.value = res.data
   } catch (error) {
     console.error('Failed to fetch permissions', error)
-    errorMessage.value = 'Failed to load system permissions'
+    console.error('Failed to fetch permissions', error)
+    errorMessage.value = t('roles.messages.permError')
   }
 }
 
@@ -68,11 +72,11 @@ async function savePermissions() {
       selectRole(updatedRole)
     }
 
-    successMessage.value = 'Permissions updated successfully'
+    successMessage.value = t('roles.messages.saveSuccess')
     setTimeout(() => (successMessage.value = ''), 3000)
   } catch (error) {
     console.error('Failed to save permissions', error)
-    errorMessage.value = 'Failed to save permissions'
+    errorMessage.value = t('roles.messages.saveError')
   } finally {
     isSaving.value = false
   }
@@ -105,15 +109,17 @@ function togglePermission(permId: string) {
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Role Management</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Manage roles and their permissions.</p>
+        <h1 class="text-xl font-semibold">{{ t('roles.title') }}</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ t('roles.subtitle') }}</p>
       </div>
     </div>
 
     <!-- Feedback Alerts -->
     <div v-if="errorMessage" class="alert alert-error text-sm py-3">
       <span>{{ errorMessage }}</span>
-      <button class="btn btn-ghost btn-xs" @click="errorMessage = ''">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="errorMessage = ''">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
     <div v-if="successMessage" class="alert alert-success text-sm py-3">
       <span>{{ successMessage }}</span>
@@ -125,7 +131,7 @@ function togglePermission(permId: string) {
         class="lg:col-span-1 bg-base-100 rounded-2xl border border-base-200 overflow-hidden h-fit"
       >
         <div class="p-4 border-b border-base-200 bg-base-200/30">
-          <h3 class="font-semibold">Roles</h3>
+          <h3 class="font-semibold">{{ t('roles.rolesList') }}</h3>
         </div>
         <div v-if="isLoading && roles.length === 0" class="p-4 text-center">
           <span class="loading loading-spinner text-primary"></span>
@@ -154,7 +160,8 @@ function togglePermission(permId: string) {
         >
           <div>
             <h3 class="font-semibold text-lg flex items-center gap-2">
-              Permissions for <span class="text-primary">{{ selectedRole.name }}</span>
+              {{ t('roles.permissionsFor') }}
+              <span class="text-primary">{{ selectedRole.name }}</span>
             </h3>
             <p class="text-xs text-base-content/60">{{ selectedRole.description }}</p>
           </div>
@@ -164,13 +171,13 @@ function togglePermission(permId: string) {
             :disabled="isSaving"
           >
             <span v-if="isSaving" class="loading loading-spinner loading-xs"></span>
-            Save Changes
+            {{ t('roles.saveChanges') }}
           </button>
         </div>
 
         <div class="p-6 overflow-y-auto max-h-[70vh]">
           <div v-if="allPermissions.length === 0" class="text-center py-12 text-base-content/50">
-            No permissions found.
+            {{ t('roles.noPermissions') }}
           </div>
 
           <div
@@ -214,7 +221,7 @@ function togglePermission(permId: string) {
         v-else
         class="lg:col-span-3 flex items-center justify-center p-12 bg-base-100 rounded-2xl border border-base-200 border-dashed text-base-content/40"
       >
-        Select a role to manage permissions.
+        {{ t('roles.selectRole') }}
       </div>
     </div>
   </div>

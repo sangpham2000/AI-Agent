@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useConversationsStore } from '@/stores/conversations'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import AppLogo from '@/components/ui/AppLogo.vue'
 import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 
 const router = useRouter()
@@ -141,7 +142,7 @@ async function handleClearAllHistory() {
           <div
             class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
           >
-            <AppIcon name="sparkles" class="w-5 h-5" />
+            <AppLogo class="w-5 h-5 text-primary" />
           </div>
           <span>AI Agent</span>
         </div>

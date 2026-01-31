@@ -3,7 +3,10 @@ import { ref, onMounted, computed } from 'vue'
 import { useDocumentsStore } from '@/stores/documents'
 import type { Document } from '@/api'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { useI18n } from 'vue-i18n'
+import { formatDate } from '@/utils/format'
 
+const { t } = useI18n()
 const documentsStore = useDocumentsStore()
 
 // Modal state
@@ -29,6 +32,7 @@ const categories = [
   'Student Affairs',
   'IT Support',
   'Regulations',
+  'Academic Resources',
   'General',
 ]
 
@@ -121,8 +125,6 @@ async function handleDelete() {
   }
 }
 
-import { formatDate } from '@/utils/format'
-
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B'
   const k = 1024
@@ -144,14 +146,14 @@ function getFileIcon(fileType: string): string {
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Document Management</h1>
+        <h1 class="text-xl font-semibold">{{ t('documents.title') }}</h1>
         <p class="text-sm text-base-content/50 mt-0.5">
-          Upload and manage knowledge base documents.
+          {{ t('documents.subtitle') }}
         </p>
       </div>
       <button class="btn btn-primary btn-sm gap-2 rounded-lg" @click="openUploadModal">
         <AppIcon name="upload" class="w-4 h-4" />
-        Upload
+        {{ t('actions.upload') }}
       </button>
     </div>
 
@@ -159,7 +161,9 @@ function getFileIcon(fileType: string): string {
     <div v-if="documentsStore.error" class="alert alert-error text-sm py-3 rounded-xl">
       <AppIcon name="exclamation" class="w-5 h-5" />
       <span>{{ documentsStore.error }}</span>
-      <button class="btn btn-ghost btn-xs" @click="documentsStore.clearMessages()">Dismiss</button>
+      <button class="btn btn-ghost btn-xs" @click="documentsStore.clearMessages()">
+        {{ t('actions.dismiss') }}
+      </button>
     </div>
 
     <!-- Stats -->
@@ -167,14 +171,14 @@ function getFileIcon(fileType: string): string {
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="document-text" class="w-3.5 h-3.5" />
-          Total Documents
+          {{ t('documents.totalDocuments') }}
         </p>
         <p class="text-2xl font-bold text-primary">{{ documentsStore.totalCount }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="check-circle" class="w-3.5 h-3.5" />
-          Processed
+          {{ t('documents.processed') }}
         </p>
         <p class="text-2xl font-bold text-success">
           {{ documentsStore.documents.filter((d) => d.isProcessed).length }}
@@ -183,7 +187,7 @@ function getFileIcon(fileType: string): string {
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="clock" class="w-3.5 h-3.5" />
-          Pending
+          {{ t('documents.pending') }}
         </p>
         <p class="text-2xl font-bold text-warning">
           {{ documentsStore.documents.filter((d) => !d.isProcessed).length }}
@@ -202,7 +206,7 @@ function getFileIcon(fileType: string): string {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Search documents..."
+            :placeholder="t('documents.searchPlaceholder')"
             class="input input-sm w-full pl-9 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none transition-all"
           />
         </div>
@@ -210,16 +214,16 @@ function getFileIcon(fileType: string): string {
           v-model="categoryFilter"
           class="select select-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none"
         >
-          <option value="">All Categories</option>
+          <option value="">{{ t('documents.allCategories') }}</option>
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
         <select
           v-model="processedFilter"
           class="select select-sm w-full sm:w-32 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none"
         >
-          <option value="all">All Status</option>
-          <option value="processed">Processed</option>
-          <option value="pending">Pending</option>
+          <option value="all">{{ t('documents.allStatus') }}</option>
+          <option value="processed">{{ t('documents.processed') }}</option>
+          <option value="pending">{{ t('documents.pending') }}</option>
         </select>
       </div>
     </div>
@@ -230,11 +234,21 @@ function getFileIcon(fileType: string): string {
         <table class="table">
           <thead>
             <tr class="border-base-200 bg-base-50/50">
-              <th class="text-xs font-medium text-base-content/50">Document</th>
-              <th class="text-xs font-medium text-base-content/50">Category</th>
-              <th class="text-xs font-medium text-base-content/50">Size</th>
-              <th class="text-xs font-medium text-base-content/50">Status</th>
-              <th class="text-xs font-medium text-base-content/50">Uploaded</th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('documents.table.document') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('documents.table.category') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('documents.table.size') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('documents.table.status') }}
+              </th>
+              <th class="text-xs font-medium text-base-content/50">
+                {{ t('documents.table.uploaded') }}
+              </th>
               <th class="text-xs font-medium text-base-content/50 w-16"></th>
             </tr>
           </thead>
@@ -245,7 +259,9 @@ function getFileIcon(fileType: string): string {
               </td>
             </tr>
             <tr v-else-if="!filteredDocuments.length">
-              <td colspan="6" class="text-center py-12 text-base-content/50">No documents found</td>
+              <td colspan="6" class="text-center py-12 text-base-content/50">
+                {{ t('documents.table.noDocuments') }}
+              </td>
             </tr>
             <tr v-for="doc in filteredDocuments" :key="doc.id" class="hover border-base-100">
               <td>
@@ -275,7 +291,7 @@ function getFileIcon(fileType: string): string {
                     doc.isProcessed ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
                   ]"
                 >
-                  {{ doc.isProcessed ? 'Processed' : 'Pending' }}
+                  {{ doc.isProcessed ? t('documents.processed') : t('documents.pending') }}
                 </span>
               </td>
               <td class="text-sm text-base-content/60">{{ formatDate(doc.createdAt) }}</td>
@@ -298,7 +314,7 @@ function getFileIcon(fileType: string): string {
       <div class="modal-box max-w-lg rounded-2xl">
         <h3 class="font-semibold text-lg mb-4 flex items-center gap-2">
           <AppIcon name="upload" class="w-5 h-5 text-primary" />
-          Upload Document
+          {{ t('documents.uploadTitle') }}
         </h3>
         <form @submit.prevent="handleUpload" class="space-y-4">
           <!-- Drop Zone -->
@@ -330,29 +346,31 @@ function getFileIcon(fileType: string): string {
               >
                 <AppIcon name="cloud-upload" class="w-6 h-6" />
               </div>
-              <p class="text-sm text-base-content/60">Drop files here or click to upload</p>
-              <p class="text-xs text-base-content/40">PDF, DOC, DOCX, TXT, MD</p>
+              <p class="text-sm text-base-content/60">{{ t('documents.dragDrop') }}</p>
+              <p class="text-xs text-base-content/40">{{ t('documents.supportedFormats') }}</p>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div class="form-control">
-              <label class="text-xs font-medium text-base-content/60 mb-1">Title</label>
+              <label class="text-xs font-medium text-base-content/60 mb-1">{{
+                t('documents.form.title')
+              }}</label>
               <input
                 v-model="uploadTitle"
                 type="text"
                 class="input input-sm input-bordered rounded-lg focus:outline-none focus:border-primary"
-                placeholder="Document title"
+                :placeholder="t('documents.form.title')"
               />
             </div>
             <div class="form-control">
               <label class="text-xs font-medium text-base-content/60 mb-1">
-                Category <span class="text-error">*</span>
+                {{ t('documents.form.category') }} <span class="text-error">*</span>
               </label>
               <select
                 v-model="uploadCategory"
                 class="select select-sm select-bordered rounded-lg focus:outline-none focus:border-primary"
               >
-                <option value="">Select...</option>
+                <option value="">{{ t('documents.form.selectCategory') }}</option>
                 <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
               </select>
             </div>
@@ -364,7 +382,7 @@ function getFileIcon(fileType: string): string {
               max="100"
             ></progress>
             <p class="text-xs text-center text-base-content/50">
-              Uploading... {{ documentsStore.uploadProgress }}%
+              {{ t('documents.form.uploading') }} {{ documentsStore.uploadProgress }}%
             </p>
           </div>
           <div class="flex justify-end gap-2 pt-2">
@@ -373,7 +391,7 @@ function getFileIcon(fileType: string): string {
               class="btn btn-ghost btn-sm rounded-lg"
               @click="showUploadModal = false"
             >
-              Cancel
+              {{ t('actions.cancel') }}
             </button>
             <button
               type="submit"
@@ -384,7 +402,7 @@ function getFileIcon(fileType: string): string {
                 v-if="documentsStore.isUploading"
                 class="loading loading-spinner loading-xs"
               ></span>
-              Upload
+              {{ t('actions.upload') }}
             </button>
           </div>
         </form>
@@ -399,22 +417,22 @@ function getFileIcon(fileType: string): string {
       <div class="modal-box max-w-sm rounded-2xl">
         <h3 class="font-semibold text-lg flex items-center gap-2 text-error">
           <AppIcon name="trash" class="w-5 h-5" />
-          Delete Document
+          {{ t('documents.deleteModal.title') }}
         </h3>
-        <p class="py-4 text-sm text-base-content/70">
-          Are you sure you want to delete <strong>{{ documentToDelete?.title }}</strong
-          >? All processed chunks will also be removed.
-        </p>
+        <p
+          class="py-4 text-sm text-base-content/70"
+          v-html="t('documents.deleteModal.message', { title: documentToDelete?.title })"
+        ></p>
         <div class="flex justify-end gap-2">
           <button class="btn btn-ghost btn-sm rounded-lg" @click="showDeleteModal = false">
-            Cancel
+            {{ t('actions.cancel') }}
           </button>
           <button
             class="btn btn-error btn-sm rounded-lg"
             @click="handleDelete"
             :disabled="documentsStore.isLoading"
           >
-            Delete
+            {{ t('actions.delete') }}
           </button>
         </div>
       </div>

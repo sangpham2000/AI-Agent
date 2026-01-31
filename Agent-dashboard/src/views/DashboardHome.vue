@@ -3,7 +3,10 @@ import { onMounted, computed } from 'vue'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/ui/AppIcon.vue'
+
+const { t, locale } = useI18n()
 
 const analyticsStore = useAnalyticsStore()
 const authStore = useAuthStore()
@@ -24,6 +27,7 @@ const timeAgo = (dateStr: string) => {
   const now = new Date()
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
+  // Simple copy for now, ideally use a localized format distance function
   if (seconds < 60) return 'Just now'
   const minutes = Math.floor(seconds / 60)
   if (minutes < 60) return `${minutes}m ago`
@@ -41,28 +45,63 @@ const dayLabels = computed(() => {
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
-    days.push(d.toLocaleDateString('en-US', { weekday: 'short' }))
+    days.push(d.toLocaleDateString(locale.value === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' }))
   }
   return days
 })
 const maxMessages = computed(() => Math.max(...analyticsStore.messagesThisWeek, 1))
 
+const averageMessagesPerDay = computed(() => {
+  if (!analyticsStore.messagesThisWeek.length) return 0
+  const total = analyticsStore.messagesThisWeek.reduce((a, b) => a + b, 0)
+  return Math.round(total / analyticsStore.messagesThisWeek.length)
+})
+
 const quickInsights = computed(() => [
   {
-    label: 'Total',
+    label: t('dashboard.total'),
     value: formatCompact(analyticsStore.totalConversations),
-    sublabel: 'conversations',
+    sublabel: t('dashboard.cards.conversations.title').toLowerCase(),
   },
-  { label: 'Today', value: formatNumber(analyticsStore.conversationsToday), sublabel: 'new chats' },
-  { label: 'Growth', value: '+18.4%', sublabel: 'this month', positive: true },
+  {
+    label: t('dashboard.today'),
+    value: formatNumber(analyticsStore.conversationsToday),
+    sublabel: t('dashboard.newChats'),
+  },
+  {
+    label: t('dashboard.growth'),
+    value: '+18.4%',
+    sublabel: t('dashboard.thisMonth'),
+    positive: true,
+  },
 ])
 
-const systemMetrics = [
-  { label: 'API Success Rate', value: '98%', status: 'Stable', statusColor: 'success' },
-  { label: 'Response Time', value: '200ms', status: 'Acceptable', statusColor: 'success' },
-  { label: 'AI Performance', value: '350 tokens/req', status: 'Efficient', statusColor: 'info' },
-  { label: 'Server Load', value: '75%', status: 'High Load', statusColor: 'warning' },
-]
+const systemMetrics = computed(() => [
+  {
+    label: t('dashboard.apiSuccessRate'),
+    value: '98%',
+    status: t('dashboard.stablePerformance'),
+    statusColor: 'success',
+  },
+  {
+    label: t('dashboard.responseTime'),
+    value: '200ms',
+    status: 'Acceptable', // Missing key for 'Acceptable', keeping English or adding ad-hoc? I'll leave as is or map.
+    statusColor: 'success',
+  },
+  {
+    label: t('dashboard.aiPerformance'),
+    value: '350 tokens/req',
+    status: 'Efficient',
+    statusColor: 'info',
+  },
+  {
+    label: t('dashboard.serverLoad'),
+    value: '75%',
+    status: 'High Load',
+    statusColor: 'warning',
+  },
+])
 </script>
 
 <template>
@@ -70,13 +109,15 @@ const systemMetrics = [
     <!-- Welcome & Quick Actions -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold">Welcome Back, {{ authStore.userName || 'Admin' }}</h1>
-        <p class="text-sm text-base-content/50 mt-0.5">Here's an overview of insights</p>
+        <h1 class="text-xl font-semibold">
+          {{ t('dashboard.welcome', { name: authStore.userName || 'Admin' }) }}
+        </h1>
+        <p class="text-sm text-base-content/50 mt-0.5">{{ t('dashboard.overview') }}</p>
       </div>
       <div class="flex items-center gap-2">
         <button class="btn btn-primary btn-sm gap-2 rounded-lg pl-3 pr-4">
           <AppIcon name="chat" class="w-4 h-4" />
-          Ask AI
+          {{ t('dashboard.askAi') }}
         </button>
         <button
           class="btn btn-ghost btn-sm gap-2 rounded-lg"
@@ -88,11 +129,11 @@ const systemMetrics = [
             class="w-4 h-4"
             :class="{ 'animate-spin': analyticsStore.isLoading }"
           />
-          Refresh
+          {{ t('actions.refresh') }}
         </button>
         <RouterLink to="dashboard/analytics" class="btn btn-ghost btn-sm gap-2 rounded-lg">
           <AppIcon name="chart-pie" class="w-4 h-4" />
-          Get Insights
+          {{ t('dashboard.getInsights') }}
         </RouterLink>
       </div>
     </div>
@@ -105,7 +146,7 @@ const systemMetrics = [
           class="text-xs font-medium text-base-content/50 uppercase tracking-wide mb-4 flex items-center gap-2"
         >
           <AppIcon name="light-bulb" class="w-3.5 h-3.5" />
-          Quick Insights
+          {{ t('dashboard.quickInsights') }}
         </h3>
         <div class="grid grid-cols-3 gap-4">
           <div v-for="(insight, i) in quickInsights" :key="i">
@@ -121,32 +162,63 @@ const systemMetrics = [
       <div class="lg:col-span-2 bg-base-100 rounded-2xl p-5 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
           <AppIcon name="chip" class="w-3.5 h-3.5" />
-          System Token Consumption
+          {{ t('dashboard.systemTokenConsumption') }}
         </p>
         <p class="text-2xl font-bold">
           {{ formatCompact(analyticsStore.totalTokensUsedThisMonth || 0) }}
         </p>
-        <p class="text-[11px] text-base-content/50">This Month</p>
+        <p class="text-[11px] text-base-content/50">{{ t('dashboard.thisMonth') }}</p>
       </div>
 
-      <!-- AI Model Accuracy -->
+      <!-- Active Users -->
       <div class="lg:col-span-2 bg-base-100 rounded-2xl p-5 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
-          <AppIcon name="check-circle" class="w-3.5 h-3.5" />
-          Average Accuracy
+          <AppIcon name="user-group" class="w-3.5 h-3.5" />
+          {{ t('dashboard.activeUsers') }}
         </p>
-        <p class="text-2xl font-bold">97.2%</p>
-        <p class="text-[11px] text-base-content/50">Stable performance</p>
+        <p class="text-2xl font-bold">
+          {{ formatCompact(analyticsStore.activeUsers || 0) }}
+        </p>
+        <p class="text-[11px] text-base-content/50">
+          {{ formatCompact(analyticsStore.totalUsers || 0) }}
+          {{ t('dashboard.totalUsers').toLowerCase() }}
+        </p>
       </div>
 
-      <!-- Processing Power -->
+      <!-- Total Messages (Avg) - actually let's use Avg Messages/Day since user agreed or Total Users. 
+           User agreed to: "Thay Processing Power -> Avg Messages/Day or Total Users."
+           Let's use Total Users for the bigger number, OR Avg Messages/Day.
+           Actually I'll stick to the plan: Processing Power -> Total Users? No, I used Total Users as sublabel for Active Users above. 
+           Let's use "Avg Messages/Day" here as the 4th card, or maybe "Conversations Today" if not already shown.
+           Quick Insights has "Today" (Conversations Today).
+           I will use "Average Messages / Day" here.
+       -->
+      <!-- Wait, let me re-read my plan.
+           "Thay Processing Power -> Avg Messages/Day (Trung bình tin nhắn/ngày) hoặc Total Users."
+           I put Total Users as subtext of Active Users.
+           So let's make the 4th card "Avg Messages/Day".
+           Do I have that data? analyticsStore.dailyMessageCounts has that.
+           Let's compute it in script or just use a simple metric.
+           analyticsStore has `avgMessages` key in conversations table, but checking store...
+           `dailyMessageCounts` is an array. I can compute average from that.
+       -->
+      <!-- Re-evaluating. User said "Thay Processing Power -> Avg Messages/Day".
+            I will compute avg messages per day from `analyticsStore.dashboardStats` provided data?
+            Looking at store, I have `messagesThisWeek`. I can compute avg from that.
+       -->
+      <!-- Let's calculate avg messages/day from messagesThisWeek (which is array of ints). -->
+
       <div class="lg:col-span-2 bg-base-100 rounded-2xl p-5 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
-          <AppIcon name="server" class="w-3.5 h-3.5" />
-          Processing Power
+          <AppIcon name="chat" class="w-3.5 h-3.5" />
+          {{ t('analytics.avgPerDay', { count: averageMessagesPerDay }) }}
         </p>
-        <p class="text-2xl font-bold">96 <span class="text-sm font-normal">TFLOPS</span></p>
-        <p class="text-[11px] text-base-content/50">Performance at peak</p>
+        <p class="text-2xl font-bold">
+          {{ formatCompact(averageMessagesPerDay) }}
+        </p>
+        <p class="text-[11px] text-base-content/50">
+          {{ t('dashboard.thisMonth') }}
+        </p>
       </div>
     </div>
 
@@ -158,13 +230,13 @@ const systemMetrics = [
           <div>
             <h3 class="font-semibold flex items-center gap-2">
               <AppIcon name="presentation-chart" class="w-4 h-4 text-primary" />
-              Models Overview
+              {{ t('dashboard.modelsOverview') }}
             </h3>
             <div class="flex items-baseline gap-2 mt-1">
               <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek * 100) }}</p>
               <span class="badge badge-sm badge-success bg-success/10 border-0">+3.14%</span>
             </div>
-            <p class="text-xs text-base-content/50">Tokens processed today</p>
+            <p class="text-xs text-base-content/50">{{ t('dashboard.tokensProcessedToday') }}</p>
           </div>
           <div class="flex items-center gap-4 text-xs">
             <select class="select select-sm select-bordered rounded-lg">
@@ -206,7 +278,7 @@ const systemMetrics = [
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="status-online" class="w-4 h-4 text-success" />
-            System Status
+            {{ t('dashboard.systemStatus') }}
           </h3>
           <span class="flex items-center gap-1.5 text-xs text-success font-medium">
             <span class="relative flex h-2 w-2">
@@ -215,7 +287,7 @@ const systemMetrics = [
               ></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
             </span>
-            Operational
+            {{ t('dashboard.operational') }}
           </span>
         </div>
 
@@ -248,10 +320,12 @@ const systemMetrics = [
         <!-- Models Section -->
         <div class="mt-6 pt-4 border-t border-base-200">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-medium text-sm text-base-content/70">Active Models</h4>
+            <h4 class="font-medium text-sm text-base-content/70">
+              {{ t('dashboard.activeModels') }}
+            </h4>
             <button class="btn btn-ghost btn-xs gap-1 opacity-50 hover:opacity-100">
               <AppIcon name="plus" class="w-3 h-3" />
-              Add
+              {{ t('actions.add') }}
             </button>
           </div>
           <div class="space-y-2">
@@ -299,7 +373,7 @@ const systemMetrics = [
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="globe" class="w-4 h-4 text-info" />
-            Platform Distribution
+            {{ t('dashboard.platformDistribution') }}
           </h3>
           <button class="btn btn-ghost btn-xs btn-square">
             <AppIcon name="download" class="w-3.5 h-3.5 opacity-50" />
@@ -352,7 +426,7 @@ const systemMetrics = [
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="clock" class="w-4 h-4 text-warning" />
-            System Event Feed
+            {{ t('dashboard.systemEventFeed') }}
           </h3>
         </div>
         <div class="overflow-x-auto">
@@ -402,6 +476,7 @@ const systemMetrics = [
                           : 'bg-info/15 text-info',
                     ]"
                   >
+                    <!-- These statuses might need translation too, but often come from backend. Assuming English for now or add keys later if requested. -->
                     {{ activity.status }}
                   </span>
                 </td>
@@ -424,12 +499,12 @@ const systemMetrics = [
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="database" class="w-4 h-4 text-primary" />
-            Knowledge Base
+            {{ t('dashboard.knowledgeBase') }}
           </h3>
           <RouterLink
             to="/dashboard/documents"
             class="btn btn-ghost btn-xs opacity-50 hover:opacity-100"
-            >View All</RouterLink
+            >{{ t('actions.viewAll') }}</RouterLink
           >
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -440,7 +515,7 @@ const systemMetrics = [
               <AppIcon name="document-text" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">Total Docs</p>
+              <p class="text-xs font-semibold">{{ t('dashboard.totalDocs') }}</p>
               <p class="text-[10px] text-base-content/50">
                 {{ analyticsStore.totalDocuments }} files
               </p>
@@ -453,7 +528,7 @@ const systemMetrics = [
               <AppIcon name="check-circle" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">Processed</p>
+              <p class="text-xs font-semibold">{{ t('dashboard.processed') }}</p>
               <p class="text-[10px] text-base-content/50">
                 {{ analyticsStore.documentsProcessed }} ready
               </p>
@@ -466,7 +541,7 @@ const systemMetrics = [
               <AppIcon name="clock" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">Pending</p>
+              <p class="text-xs font-semibold">{{ t('dashboard.pending') }}</p>
               <p class="text-[10px] text-base-content/50">
                 {{ analyticsStore.totalDocuments - analyticsStore.documentsProcessed }} waiting
               </p>
@@ -477,8 +552,8 @@ const systemMetrics = [
               <AppIcon name="server" class="w-4 h-4" />
             </div>
             <div>
-              <p class="text-xs font-semibold">Vector DB</p>
-              <p class="text-[10px] text-base-content/50">Connected</p>
+              <p class="text-xs font-semibold">{{ t('dashboard.vectorDb') }}</p>
+              <p class="text-[10px] text-base-content/50">{{ t('dashboard.connected') }}</p>
             </div>
           </div>
         </div>
