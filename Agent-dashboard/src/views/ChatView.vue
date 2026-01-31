@@ -181,14 +181,7 @@ function renderMessageContent(content: string) {
       </div>
 
       <div class="flex items-center gap-3">
-        <select
-          v-if="authStore.isAuthenticated"
-          v-model="selectedModel"
-          class="select select-sm select-ghost w-24 font-normal text-xs h-8 min-h-0 bg-transparent focus:bg-base-200 border-transparent focus:border-transparent hover:bg-base-200"
-        >
-          <option value="Gemini">Gemini</option>
-          <option value="OpenAI">OpenAI</option>
-        </select>
+        <!-- Model selector removed -->
       </div>
     </div>
 
@@ -372,6 +365,46 @@ function renderMessageContent(content: string) {
               ></textarea>
 
               <div class="flex items-center gap-1 pb-1.5 pr-1.5">
+                <!-- Model Selector -->
+                <div
+                  class="dropdown dropdown-top dropdown-end mr-1"
+                  v-if="authStore.isAuthenticated"
+                >
+                  <div
+                    tabindex="0"
+                    role="button"
+                    class="btn btn-xs btn-ghost gap-1 font-normal text-xs text-base-content/60 hover:text-base-content hover:bg-base-200 h-8 px-2 rounded-lg"
+                  >
+                    {{ selectedModel }}
+                    <AppIcon name="chevron-down" class="w-3 h-3 opacity-50" />
+                  </div>
+                  <ul
+                    tabindex="0"
+                    class="dropdown-content z-[1] menu p-1 shadow-lg bg-base-100 rounded-xl border border-base-200 w-32 mb-2"
+                  >
+                    <li>
+                      <button
+                        @click="selectedModel = 'Gemini'"
+                        :class="{ active: selectedModel === 'Gemini' }"
+                        class="text-xs py-2 rounded-lg"
+                      >
+                        Gemini
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        @click="selectedModel = 'OpenAI'"
+                        :class="{ active: selectedModel === 'OpenAI' }"
+                        class="text-xs py-2 rounded-lg"
+                      >
+                        OpenAI
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="w-px h-4 bg-base-content/10 mx-1"></div>
+
                 <button
                   class="btn btn-circle btn-xs btn-ghost text-base-content/40 hover:text-base-content/60 hover:bg-base-200 transition-colors"
                   title="Attach file"
