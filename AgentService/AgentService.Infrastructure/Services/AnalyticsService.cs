@@ -160,10 +160,11 @@ public class AnalyticsService : IAnalyticsService
     public async Task<IEnumerable<ConversationTrendDto>> GetConversationTrendsAsync(int days = 7)
     {
         var startDate = DateTime.UtcNow.Date.AddDays(-days + 1);
+        var previousStartDate = startDate.AddDays(-days);
 
-        // Fetch timestamps to perform reliable grouping in-memory
+        // Fetch timestamps for both periods to perform reliable grouping in-memory
         var timestamps = await _context.Conversations
-            .Where(c => c.CreatedAt >= startDate)
+            .Where(c => c.CreatedAt >= previousStartDate)
             .Select(c => c.CreatedAt)
             .ToListAsync();
 
@@ -171,8 +172,12 @@ public class AnalyticsService : IAnalyticsService
         for (int i = 0; i < days; i++)
         {
             var date = startDate.AddDays(i);
+            var previousDate = date.AddDays(-days);
+            
             var count = timestamps.Count(t => t.Date == date);
-            result.Add(new ConversationTrendDto(date, count));
+            var previousCount = timestamps.Count(t => t.Date == previousDate);
+            
+            result.Add(new ConversationTrendDto(date, count, previousCount));
         }
 
         return result;

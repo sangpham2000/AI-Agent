@@ -53,7 +53,8 @@ public record PlatformDistributionDto(
 /// </summary>
 public record ConversationTrendDto(
     DateTime Date,
-    int Count
+    int Count,
+    int? PreviousCount = null
 );
 
 /// <summary>
