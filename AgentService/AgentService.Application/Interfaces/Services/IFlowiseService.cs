@@ -10,7 +10,7 @@ public interface IFlowiseService
     /// <summary>
     /// Send a message with conversation history for context
     /// </summary>
-    Task<FlowiseResponse> SendMessageWithHistoryAsync(string message, List<ChatMessage> history, string? sessionId = null, string model = "Gemini");
+    Task<FlowiseResponse> SendMessageWithHistoryAsync(string message, List<ChatMessage> history, string? sessionId = null, Dictionary<string, object>? overrideConfig = null, string model = "Gemini");
 
     /// <summary>
     /// Upload and ingest a document into the vector store via Flowise

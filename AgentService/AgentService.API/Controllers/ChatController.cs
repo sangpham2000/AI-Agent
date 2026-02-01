@@ -32,6 +32,7 @@ public class ChatController : ControllerBase
             request.SessionId,
             request.Platform,
             _currentUserService.UserId,
+            null, // AgentId
             request.Model
         );
 

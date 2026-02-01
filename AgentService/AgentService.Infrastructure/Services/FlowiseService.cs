@@ -139,11 +139,11 @@ public class FlowiseService : IFlowiseService
         }
     }
 
-    public async Task<FlowiseResponse> SendMessageWithHistoryAsync(string message, List<ChatMessage> history, string? sessionId = null, string model = "Gemini")
+    public async Task<FlowiseResponse> SendMessageWithHistoryAsync(string message, List<ChatMessage> history, string? sessionId = null, Dictionary<string, object>? overrideConfig = null, string model = "Gemini")
     {
         // Flowise handles history via sessionId, so we just pass the message
         // The history is maintained by Flowise internally when using persistent sessions
-        return await SendMessageAsync(message, sessionId, null, model);
+        return await SendMessageAsync(message, sessionId, overrideConfig, model);
     }
     
     public async Task<bool> IngestDocumentAsync(Stream fileStream, string fileName, Dictionary<string, object>? metadata = null)

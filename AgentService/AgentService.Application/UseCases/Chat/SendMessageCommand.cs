@@ -9,5 +9,6 @@ public record SendMessageCommand(
     string? SessionId,
     string Platform,
     Guid? UserId,
+    Guid? AgentId = null,
     string Model = "Gemini"
 ) : IRequest<SendMessageResponse>;

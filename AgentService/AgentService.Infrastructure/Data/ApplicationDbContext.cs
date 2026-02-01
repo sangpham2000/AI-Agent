@@ -25,6 +25,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<DocumentChunk> DocumentChunks { get; set; }
     public DbSet<UserQuota> UserQuotas { get; set; }
     public DbSet<TelegramUser> TelegramUsers { get; set; }
+    public DbSet<Agent> Agents { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

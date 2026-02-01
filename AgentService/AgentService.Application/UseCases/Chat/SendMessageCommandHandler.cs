@@ -120,12 +120,64 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Sen
             .Select(m => new ChatMessage(m.Role, m.Content))
             .ToListAsync(cancellationToken);
 
+        // Determine Agent
+        AgentService.Domain.Entities.Agent? agent = null;
+        if (request.AgentId.HasValue)
+        {
+            agent = await _context.Agents.FindAsync(new object[] { request.AgentId.Value }, cancellationToken);
+        }
+        
+        if (agent == null)
+        {
+            // Default agent logic
+            agent = await _context.Agents.FirstOrDefaultAsync(a => a.IsDefault, cancellationToken);
+        }
+
+        // Prepare Flowise Override Config
+        Dictionary<string, object>? overrideConfig = null;
+        // string model = request.Model; // Keep request model if no agent??? Or Agent overrides?
+        // Agent should override model (ChatflowId)
+        
+        string chatflowId = request.Model;
+
+        if (agent != null)
+        {
+            chatflowId = agent.FlowiseChatflowId;
+            
+            overrideConfig = new Dictionary<string, object>();
+
+            if (!string.IsNullOrEmpty(agent.SystemPrompt))
+            {
+                overrideConfig["systemMessagePrompt"] = agent.SystemPrompt;
+            }
+
+            if (!string.IsNullOrEmpty(agent.FlowiseConfig))
+            {
+                try 
+                {
+                    var configJson = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(agent.FlowiseConfig);
+                    if (configJson != null)
+                    {
+                        foreach (var kvp in configJson)
+                        {
+                            overrideConfig[kvp.Key] = kvp.Value;
+                        }
+                    }
+                }
+                catch 
+                { 
+                    // Ignore invalid JSON config
+                }
+            }
+        }
+
         // Call Flowise AI
         var flowiseResponse = await _flowiseService.SendMessageWithHistoryAsync(
             request.Message,
             history,
             conversation.Id.ToString(),
-            request.Model
+            overrideConfig,
+            chatflowId
         );
 
         // Save AI response
@@ -197,5 +249,7 @@ public interface IApplicationDbContext
     DbSet<Document> Documents { get; }
     DbSet<DocumentChunk> DocumentChunks { get; }
     DbSet<UserQuota> UserQuotas { get; }
+    DbSet<AgentService.Domain.Entities.TelegramUser> TelegramUsers { get; }
+    DbSet<Agent> Agents { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
