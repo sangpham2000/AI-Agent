@@ -2,6 +2,10 @@
 import { RouterView, RouterLink } from 'vue-router'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import AppLogo from '@/components/ui/AppLogo.vue'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const handleRegister = () => {
   const authority =
@@ -38,25 +42,29 @@ const handleRegister = () => {
 
         <!-- Desktop Navigation -->
         <div class="hidden md:flex items-center gap-8">
-          <a
-            href="#"
+          <RouterLink
+            to="/features"
             class="text-sm font-medium text-base-content/60 hover:text-primary transition-colors"
-            >Features</a
+            active-class="text-primary font-semibold"
+            >{{ t('landing.nav.features') || 'Features' }}</RouterLink
           >
-          <a
-            href="#"
+          <RouterLink
+            to="/solutions"
             class="text-sm font-medium text-base-content/60 hover:text-primary transition-colors"
-            >Solutions</a
+            active-class="text-primary font-semibold"
+            >{{ t('landing.nav.solutions') || 'Solutions' }}</RouterLink
           >
-          <a
-            href="#"
+          <RouterLink
+            to="/pricing"
             class="text-sm font-medium text-base-content/60 hover:text-primary transition-colors"
-            >Pricing</a
+            active-class="text-primary font-semibold"
+            >{{ t('landing.nav.pricing') || 'Pricing' }}</RouterLink
           >
-          <a
-            href="#"
+          <RouterLink
+            to="/resources"
             class="text-sm font-medium text-base-content/60 hover:text-primary transition-colors"
-            >Resources</a
+            active-class="text-primary font-semibold"
+            >{{ t('landing.nav.resources') || 'Resources' }}</RouterLink
           >
         </div>
 
@@ -66,15 +74,18 @@ const handleRegister = () => {
             to="/login"
             class="hidden sm:flex text-sm font-medium text-base-content/70 hover:text-primary transition-colors"
           >
-            Sign In
+            {{ t('landing.nav.signIn') || 'Sign In' }}
           </RouterLink>
 
           <button
             @click="handleRegister"
-            class="hidden sm:flex text-sm font-medium text-base-content/70 hover:text-primary transition-colors"
+            class="hidden sm:flex btn btn-primary btn-sm rounded-full px-6 font-medium text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300"
           >
-            Sign Up
+            {{ t('landing.nav.signUp') || 'Sign Up' }}
           </button>
+
+          <!-- Language Switcher -->
+          <LanguageSwitcher />
 
           <!-- Theme Toggle -->
           <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm">
@@ -133,9 +144,17 @@ const handleRegister = () => {
           <div>
             <h4 class="font-bold text-sm mb-4">Product</h4>
             <ul class="space-y-2 text-sm text-base-content/60">
-              <li><a href="#" class="hover:text-primary transition-colors">Features</a></li>
+              <li>
+                <RouterLink to="/features" class="hover:text-primary transition-colors"
+                  >Features</RouterLink
+                >
+              </li>
               <li><a href="#" class="hover:text-primary transition-colors">Integrations</a></li>
-              <li><a href="#" class="hover:text-primary transition-colors">Pricing</a></li>
+              <li>
+                <RouterLink to="/pricing" class="hover:text-primary transition-colors"
+                  >Pricing</RouterLink
+                >
+              </li>
               <li><a href="#" class="hover:text-primary transition-colors">Changelog</a></li>
             </ul>
           </div>
@@ -143,10 +162,26 @@ const handleRegister = () => {
           <div>
             <h4 class="font-bold text-sm mb-4">Resources</h4>
             <ul class="space-y-2 text-sm text-base-content/60">
-              <li><a href="#" class="hover:text-primary transition-colors">Documentation</a></li>
-              <li><a href="#" class="hover:text-primary transition-colors">API Reference</a></li>
-              <li><a href="#" class="hover:text-primary transition-colors">Community</a></li>
-              <li><a href="#" class="hover:text-primary transition-colors">Blog</a></li>
+              <li>
+                <RouterLink to="/resources" class="hover:text-primary transition-colors"
+                  >Documentation</RouterLink
+                >
+              </li>
+              <li>
+                <RouterLink to="/resources" class="hover:text-primary transition-colors"
+                  >API Reference</RouterLink
+                >
+              </li>
+              <li>
+                <RouterLink to="/resources" class="hover:text-primary transition-colors"
+                  >Community</RouterLink
+                >
+              </li>
+              <li>
+                <RouterLink to="/resources" class="hover:text-primary transition-colors"
+                  >Blog</RouterLink
+                >
+              </li>
             </ul>
           </div>
 

@@ -12,6 +12,26 @@ const router = createRouter({
           name: 'landing',
           component: () => import('@/views/LandingView.vue'),
         },
+        {
+          path: 'features',
+          name: 'features',
+          component: () => import('@/views/FeaturesView.vue'),
+        },
+        {
+          path: 'solutions',
+          name: 'solutions',
+          component: () => import('@/views/SolutionsView.vue'),
+        },
+        {
+          path: 'pricing',
+          name: 'pricing',
+          component: () => import('@/views/PricingView.vue'),
+        },
+        {
+          path: 'resources',
+          name: 'resources',
+          component: () => import('@/views/ResourcesView.vue'),
+        },
       ],
     },
     {
@@ -97,7 +117,15 @@ router.beforeEach(async (to, from, next) => {
     await authStore.initialize()
   }
 
-  const publicPages = ['/', '/login', '/callback']
+  const publicPages = [
+    '/',
+    '/login',
+    '/callback',
+    '/features',
+    '/solutions',
+    '/pricing',
+    '/resources',
+  ]
   const authRequired = !publicPages.includes(to.path)
 
   if (authRequired && !authStore.isAuthenticated) {

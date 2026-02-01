@@ -2,7 +2,7 @@ export default {
   // Common
   app: {
     name: 'AI Agent',
-    title: 'Trợ lý Ảo Giáo dục',
+    title: 'Trợ lý AI Giáo dục',
   },
 
   common: {
@@ -27,21 +27,31 @@ export default {
 
   landing: {
     hero: {
-      badge: 'Nền tảng Đa tác tử Sẵn sàng',
+      badge: 'Nền tảng Đa tác vụ Sẵn sàng',
       title: 'Tương lai của',
-      highlight: 'Tác tử Thông minh',
+      highlight: 'Trợ lý Thông minh',
       description:
-        'Triển khai các tác tử AI tùy chỉnh cho Giáo dục, Doanh nghiệp và Hỗ trợ. Tích hợp liền mạch, tùy chỉnh hoàn toàn và luôn sẵn sàng.',
+        'Triển khai các trợ lý AI tùy chỉnh cho Giáo dục, Doanh nghiệp và Hỗ trợ. Tích hợp liền mạch, tùy chỉnh hoàn toàn và luôn sẵn sàng.',
+    },
+    nav: {
+      features: 'Tính năng',
+      solutions: 'Giải pháp',
+      pricing: 'Bảng giá',
+      resources: 'Tài nguyên',
+      signIn: 'Đăng nhập',
+      signUp: 'Đăng ký',
     },
     cta: {
-      placeholder: 'Thiết kế quy trình tác tử của bạn...',
+      placeholder: 'Thiết kế quy trình trợ lý của bạn...',
       multiTenant: 'Hỗ trợ Đa thuê bao',
       enterprise: 'Cấp Doanh nghiệp',
+      businessReady: 'Sẵn sàng cho Doanh nghiệp',
+      fastDeploy: 'Triển khai Nhanh',
     },
     features: {
       core: {
-        title: 'Lõi Đa tác tử',
-        description: 'Điều phối nhiều tác tử chuyên biệt cho các miền và nhiệm vụ khác nhau.',
+        title: 'Lõi Đa tác vụ',
+        description: 'Điều phối nhiều trợ lý chuyên biệt cho các miền và nhiệm vụ khác nhau.',
       },
       knowledge: {
         title: 'Cơ sở tri thức',
@@ -52,6 +62,67 @@ export default {
         description:
           'Được xây dựng để hỗ trợ hàng ngàn người dùng đồng thời và quy trình làm việc phức tạp.',
       },
+    },
+  },
+
+  featuresPage: {
+    title: 'Tính năng',
+    highlight: 'Mạnh mẽ',
+    subtitle: 'Mọi thứ bạn cần để xây dựng, triển khai và mở rộng các trợ lý AI thông minh.',
+    cards: {
+      title: 'Tính năng',
+      description: 'Khả năng nâng cao để cải thiện quy trình làm việc và hiệu quả của trợ lý.',
+    },
+  },
+  solutionsPage: {
+    title: 'Giải pháp',
+    highlight: 'Ngành nghề',
+    subtitle: 'Kiến trúc trợ lý AI được thiết kế riêng cho từng lĩnh vực.',
+    education: {
+      title: 'Giáo dục',
+      description: 'Gia sư cá nhân hóa, tự động hóa hành chính và trợ lý nghiên cứu.',
+    },
+    enterprise: {
+      title: 'Doanh nghiệp',
+      description: 'Truy xuất tri thức nội bộ, tự động hóa hỗ trợ khách hàng và phân tích dữ liệu.',
+    },
+    learnMore: 'Tìm hiểu thêm',
+  },
+  pricingPage: {
+    title: 'Bảng giá',
+    highlight: 'Đơn giản',
+    subtitle: 'Bắt đầu miễn phí, mở rộng khi bạn phát triển.',
+    starter: {
+      title: 'Khởi đầu',
+      price: '$0',
+      features: ['1 Trợ lý', '1,000 Tin nhắn/tháng', 'Hỗ trợ cộng đồng'],
+    },
+    pro: {
+      title: 'Chuyên nghiệp',
+      price: '$29',
+      tag: 'PHỔ BIẾN',
+      features: ['5 Trợ lý', '50,000 Tin nhắn/tháng', 'Hỗ trợ ưu tiên', 'Phân tích nâng cao'],
+      cta: 'Dùng thử miễn phí',
+    },
+    enterprise: {
+      title: 'Doanh nghiệp',
+      price: 'Liên hệ',
+      features: ['Không giới hạn Trợ lý', 'Giới hạn tùy chỉnh', 'SLA & Hỗ trợ chuyên dụng'],
+      cta: 'Liên hệ Sales',
+    },
+    getStarted: 'Bắt đầu ngay',
+    month: '/tháng',
+  },
+  resourcesPage: {
+    title: 'Tài nguyên',
+    highlight: 'Học tập',
+    subtitle: 'Tài liệu, hướng dẫn và cộng đồng.',
+    cards: {
+      documentation: 'Tài liệu',
+      apiReference: 'API Reference',
+      blog: 'Blog',
+      community: 'Cộng đồng',
+      description: 'Khám phá {item} toàn diện của chúng tôi để tận dụng tối đa nền tảng.',
     },
   },
 

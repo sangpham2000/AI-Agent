@@ -26,127 +26,161 @@ const handleLogin = () => {
 </script>
 
 <template>
-  <div
-    class="min-h-[calc(100vh-64px)] bg-base-100 relative overflow-hidden flex flex-col items-center justify-center"
-  >
-    <!-- Background Decor (Gradient Blobs) -->
+  <div class="min-h-[calc(100vh-64px)] bg-base-100 relative overflow-hidden flex flex-col">
+    <!-- Dynamic Background -->
+    <div class="absolute inset-0 bg-grid-pattern opacity-[0.4] z-0 pointer-events-none"></div>
+
+    <!-- Gradient Blobs -->
     <div
-      class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/20 rounded-full blur-3xl opacity-60 animate-pulse"
+      class="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-primary/20 rounded-full blur-3xl opacity-40 animate-pulse"
+      style="animation-duration: 10s"
     ></div>
     <div
-      class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/20 rounded-full blur-3xl opacity-60 animate-pulse"
-      style="animation-duration: 4s"
-    ></div>
-    <div
-      class="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-accent/20 rounded-full blur-3xl opacity-50"
+      class="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-secondary/20 rounded-full blur-3xl opacity-40 animate-pulse"
+      style="animation-duration: 8s"
     ></div>
 
-    <div class="hero-content text-center relative z-10 max-w-5xl w-full flex-col gap-12 py-12">
-      <!-- Hero Section -->
-      <div class="max-w-3xl space-y-8">
-        <div class="space-y-4">
-          <div class="badge badge-primary badge-outline mb-4">{{ t('landing.hero.badge') }}</div>
-          <h1
-            class="text-5xl md:text-7xl font-extrabold tracking-tight text-base-content leading-tight"
-          >
-            {{ t('landing.hero.title') }} <br />
+    <div
+      class="flex-1 flex flex-col lg:flex-row items-center justify-center container mx-auto px-4 py-12 lg:py-20 relative z-10 gap-16"
+    >
+      <!-- Hero Content (Left) -->
+      <div class="flex-1 max-w-2xl space-y-8 text-center lg:text-left">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/50 border border-base-content/10 backdrop-blur-md text-xs font-medium text-base-content/70 mb-4"
+        >
+          <span class="flex h-2 w-2 relative">
             <span
-              class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary"
-              >{{ t('landing.hero.highlight') }}</span
-            >
-          </h1>
-          <p class="py-4 text-lg md:text-xl text-base-content/60 max-w-2xl mx-auto leading-relaxed">
-            {{ t('landing.hero.description') }}
-          </p>
+              class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+            ></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          {{ t('landing.hero.badge') }}
         </div>
 
-        <!-- Fake Search Bar (Call to Action) -->
-        <div
-          @click="handleLogin"
-          class="group w-full max-w-2xl mx-auto bg-base-100 border border-base-300 rounded-full shadow-lg hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-pointer p-2 pr-2 flex items-center gap-4 relative overflow-hidden"
-        >
-          <div
-            class="absolute inset-0 bg-base-200/50 group-hover:bg-transparent transition-colors"
-          ></div>
-
-          <div
-            class="w-10 h-10 rounded-full bg-base-200 flex items-center justify-center relative z-10 group-hover:bg-primary/10 group-hover:text-primary transition-colors"
+        <h1 class="text-5xl lg:text-7xl font-extrabold tracking-tight leading-[1.1]">
+          {{ t('landing.hero.title') }} <br />
+          <span
+            class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-accent animate-gradient bg-300% text-glow"
           >
+            {{ t('landing.hero.highlight') }}
+          </span>
+        </h1>
+
+        <p class="text-lg text-base-content/70 leading-relaxed max-w-xl mx-auto lg:mx-0">
+          {{ t('landing.hero.description') }}
+        </p>
+
+        <!-- CTA Area -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+          <button
+            @click="handleLogin"
+            class="btn btn-primary btn-lg rounded-xl shadow-lg shadow-primary/30 hover:shadow-primary/50 group"
+          >
+            {{ t('landing.cta.placeholder') }}
             <AppIcon
-              name="sparkles"
-              class="w-5 h-5 text-base-content/50 group-hover:text-primary"
+              name="arrow-right"
+              class="w-5 h-5 group-hover:translate-x-1 transition-transform"
             />
-          </div>
+          </button>
 
-          <div class="flex-1 text-left relative z-10">
-            <span
-              class="text-base-content/40 text-lg group-hover:text-base-content/60 transition-colors"
-              >{{ t('landing.cta.placeholder') }}</span
-            >
-          </div>
-
-          <button class="btn btn-primary btn-circle btn-sm relative z-10">
-            <AppIcon name="arrow-right" class="w-4 h-4" />
+          <button
+            class="btn btn-ghost btn-lg rounded-xl border border-base-content/10 hover:bg-base-content/5"
+          >
+            <AppIcon name="play" class="w-5 h-5" />
+            Watch Demo
           </button>
         </div>
 
-        <div class="flex items-center justify-center gap-6 text-sm text-base-content/50">
-          <span class="flex items-center gap-1"
-            ><AppIcon name="check" class="w-4 h-4 text-success" />
-            {{ t('landing.cta.multiTenant') }}</span
-          >
-          <span class="flex items-center gap-1"
-            ><AppIcon name="check" class="w-4 h-4 text-success" />
-            {{ t('landing.cta.enterprise') }}</span
-          >
+        <div class="flex items-center justify-center lg:justify-start gap-8 pt-4">
+          <div class="flex items-center gap-2 text-sm font-medium text-base-content/60">
+            <AppIcon name="shield-check" class="w-5 h-5 text-success" />
+            {{ t('landing.cta.businessReady') || 'Enterprise Ready' }}
+          </div>
+          <div class="flex items-center gap-2 text-sm font-medium text-base-content/60">
+            <AppIcon name="lightning-bolt" class="w-5 h-5 text-warning" />
+            {{ t('landing.cta.fastDeploy') || 'Fast Deployment' }}
+          </div>
         </div>
       </div>
 
-      <!-- Feature Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-left mt-8">
-        <div
-          class="card bg-base-100/50 border border-base-200 backdrop-blur-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-        >
-          <div class="card-body">
-            <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-              <AppIcon name="cube" class="w-5 h-5 text-primary" />
+      <!-- Hero Visual (Right) - 3D Mockup -->
+      <div class="flex-1 w-full max-w-xl perspective-1000 hidden lg:block">
+        <div class="relative transform-3d rotate-y-12 animate-float">
+          <!-- Glass Mockup Card -->
+          <div
+            class="bg-base-100/80 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden p-4 relative z-10"
+          >
+            <!-- Fake Browser Header -->
+            <div class="flex items-center gap-2 mb-4 border-b border-base-content/5 pb-2">
+              <div class="flex gap-1.5">
+                <div class="w-3 h-3 rounded-full bg-error/80"></div>
+                <div class="w-3 h-3 rounded-full bg-warning/80"></div>
+                <div class="w-3 h-3 rounded-full bg-success/80"></div>
+              </div>
+              <div class="flex-1 mx-4 bg-base-200/50 rounded-md h-6"></div>
             </div>
-            <h3 class="font-bold text-lg">{{ t('landing.features.core.title') }}</h3>
-            <p class="text-base-content/60 text-sm">
-              {{ t('landing.features.core.description') }}
-            </p>
-          </div>
-        </div>
 
-        <div
-          class="card bg-base-100/50 border border-base-200 backdrop-blur-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-        >
-          <div class="card-body">
-            <div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center mb-2">
-              <AppIcon name="database" class="w-5 h-5 text-secondary" />
-            </div>
-            <h3 class="font-bold text-lg">{{ t('landing.features.knowledge.title') }}</h3>
-            <p class="text-base-content/60 text-sm">
-              {{ t('landing.features.knowledge.description') }}
-            </p>
-          </div>
-        </div>
+            <!-- Content Mockup -->
+            <div class="space-y-4">
+              <div class="flex gap-4">
+                <!-- Sidebar -->
+                <div class="w-1/4 space-y-2">
+                  <div class="h-8 bg-primary/10 rounded-lg w-full"></div>
+                  <div class="h-8 bg-base-200/50 rounded-lg w-3/4"></div>
+                  <div class="h-8 bg-base-200/50 rounded-lg w-4/5"></div>
+                </div>
+                <!-- Main -->
+                <div class="flex-1 space-y-4">
+                  <!-- Chat Bubbles -->
+                  <div class="flex justify-end">
+                    <div
+                      class="bg-primary text-primary-content p-3 rounded-2xl rounded-tr-none max-w-[80%] text-sm shadow-sm"
+                    >
+                      Generate a quarterly report for Q3 performance.
+                    </div>
+                  </div>
+                  <div class="flex justify-start">
+                    <div
+                      class="bg-base-200 p-3 rounded-2xl rounded-tl-none max-w-[90%] text-sm shadow-sm space-y-2"
+                    >
+                      <div class="font-semibold text-xs opacity-50">AI Agent</div>
+                      <p>Here is the summary for Q3:</p>
+                      <div
+                        class="h-24 bg-base-100 rounded-lg border border-base-300/50 flex items-end justify-around p-2 gap-1"
+                      >
+                        <div class="w-full bg-primary/40 h-[40%] rounded-sm"></div>
+                        <div class="w-full bg-primary/60 h-[70%] rounded-sm"></div>
+                        <div class="w-full bg-primary/80 h-[50%] rounded-sm"></div>
+                        <div class="w-full bg-primary h-[90%] rounded-sm"></div>
+                      </div>
+                    </div>
+                  </div>
 
-        <div
-          class="card bg-base-100/50 border border-base-200 backdrop-blur-sm hover:-translate-y-1 hover:shadow-md transition-all duration-300"
-        >
-          <div class="card-body">
-            <div class="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center mb-2">
-              <AppIcon name="lightning-bolt" class="w-5 h-5 text-accent" />
+                  <!-- Input Mockup -->
+                  <div class="pt-4">
+                    <div
+                      class="h-10 border border-primary/30 rounded-full flex items-center px-4 gap-2"
+                    >
+                      <div class="w-4 h-4 rounded-full bg-primary/20 animate-pulse"></div>
+                      <div class="h-2 w-20 bg-base-content/10 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="font-bold text-lg">{{ t('landing.features.scale.title') }}</h3>
-            <p class="text-base-content/60 text-sm">
-              {{ t('landing.features.scale.description') }}
-            </p>
           </div>
+
+          <!-- Decorative Elements behind mockup -->
+          <div
+            class="absolute -right-10 -bottom-10 w-40 h-40 bg-accent/30 rounded-full blur-2xl z-0"
+          ></div>
+          <div
+            class="absolute -left-10 -top-10 w-40 h-40 bg-primary/30 rounded-full blur-2xl z-0"
+          ></div>
         </div>
       </div>
     </div>
+
   </div>
 </template>
 

@@ -33,10 +33,20 @@ export default {
       description:
         'Deploy custom AI agents for Education, Business, and Support. Seamlessly integrated, fully customizable, and always available.',
     },
+    nav: {
+      features: 'Features',
+      solutions: 'Solutions',
+      pricing: 'Pricing',
+      resources: 'Resources',
+      signIn: 'Sign In',
+      signUp: 'Sign Up',
+    },
     cta: {
       placeholder: 'Design your agent workflow...',
       multiTenant: 'Multi-Tenant Support',
       enterprise: 'Enterprise Grade',
+      businessReady: 'Enterprise Ready',
+      fastDeploy: 'Fast Deployment',
     },
     features: {
       core: {
