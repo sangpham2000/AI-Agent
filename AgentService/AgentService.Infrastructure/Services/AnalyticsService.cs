@@ -104,6 +104,41 @@ public class AnalyticsService : IAnalyticsService
             .Take(10)
             .ToList();
 
+
+        // --- Growth Calculation (This Month vs Last Month) ---
+        var firstDayThisMonth = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        var firstDayLastMonth = firstDayThisMonth.AddMonths(-1);
+        
+        var conversationsThisMonth = await _context.Conversations.CountAsync(c => c.CreatedAt >= firstDayThisMonth);
+        var conversationsLastMonth = await _context.Conversations.CountAsync(c => c.CreatedAt >= firstDayLastMonth && c.CreatedAt < firstDayThisMonth);
+        
+        double conversationGrowthRate = 0;
+        if (conversationsLastMonth > 0)
+        {
+            conversationGrowthRate = ((double)(conversationsThisMonth - conversationsLastMonth) / conversationsLastMonth) * 100;
+        }
+        else if (conversationsThisMonth > 0)
+        {
+            conversationGrowthRate = 100; // 100% growth if started from 0
+        }
+
+        double tokenUseGrowthRate = 0;
+
+        // --- AI Performance (Avg Tokens / Assistant Message) ---
+        var totalAssistantMessages = await _context.Messages.CountAsync(m => m.Role == "assistant");
+        double avgTokensPerResponse = 0;
+        if (totalAssistantMessages > 0)
+        {
+            avgTokensPerResponse = (double)totalTokensUsed / totalAssistantMessages;
+        }
+
+        // --- Active Models (Simulated/Config based) ---
+        var activeModels = new List<ActiveModelDto>
+        {
+            new ActiveModelDto("Gemini 1.5 Flash", "Active", true),
+            new ActiveModelDto("GPT-4o Mini", "Inactive", false)
+        };
+
         return new DashboardStatsDto(
             totalConversations,
             conversationsToday,
@@ -114,7 +149,11 @@ public class AnalyticsService : IAnalyticsService
             totalTokensUsed,
             messagesThisWeek,
             platformDistribution,
-            allActivities
+            allActivities,
+            Math.Round(conversationGrowthRate, 1),
+            tokenUseGrowthRate,
+            Math.Round(avgTokensPerResponse, 0),
+            activeModels
         );
     }
 
