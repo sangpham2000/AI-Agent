@@ -12,7 +12,10 @@ const documentsStore = useDocumentsStore()
 // Modal state
 const showUploadModal = ref(false)
 const showDeleteModal = ref(false)
+const showPreviewModal = ref(false)
 const documentToDelete = ref<Document | null>(null)
+const previewContent = ref<string>('')
+const previewTitle = ref<string>('')
 
 // Upload form
 const uploadFile = ref<File | null>(null)
@@ -99,6 +102,15 @@ function openUploadModal() {
 function openDeleteModal(doc: Document) {
   documentToDelete.value = doc
   showDeleteModal.value = true
+}
+
+async function openPreviewModal(doc: Document) {
+  previewTitle.value = doc.title
+  previewContent.value = 'Loading...'
+  showPreviewModal.value = true
+
+  const content = await documentsStore.fetchDocumentContent(doc.id)
+  previewContent.value = content || 'Preview not available or file is empty.'
 }
 
 async function handleUpload() {
@@ -296,12 +308,22 @@ function getFileIcon(fileType: string): string {
               </td>
               <td class="text-sm text-base-content/60">{{ formatDate(doc.createdAt) }}</td>
               <td>
-                <button
-                  class="btn btn-ghost btn-xs btn-square text-error/70 hover:text-error hover:bg-error/10 rounded-lg"
-                  @click="openDeleteModal(doc)"
-                >
-                  <AppIcon name="trash" class="w-4 h-4" />
-                </button>
+                <div class="flex items-center gap-1">
+                  <button
+                    class="btn btn-ghost btn-xs btn-square text-base-content/70 hover:text-primary hover:bg-primary/10 rounded-lg"
+                    @click="openPreviewModal(doc)"
+                    :title="t('actions.view')"
+                  >
+                    <AppIcon name="eye" class="w-4 h-4" />
+                  </button>
+                  <button
+                    class="btn btn-ghost btn-xs btn-square text-error/70 hover:text-error hover:bg-error/10 rounded-lg"
+                    @click="openDeleteModal(doc)"
+                    :title="t('actions.delete')"
+                  >
+                    <AppIcon name="trash" class="w-4 h-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -438,6 +460,39 @@ function getFileIcon(fileType: string): string {
       </div>
       <form method="dialog" class="modal-backdrop">
         <button @click="showDeleteModal = false">close</button>
+      </form>
+    </dialog>
+
+    <!-- Preview Modal -->
+    <dialog :class="['modal', { 'modal-open': showPreviewModal }]">
+      <div class="modal-box w-11/12 max-w-4xl h-[80vh] rounded-2xl flex flex-col p-0">
+        <div class="flex items-center justify-between p-4 border-b border-base-200">
+          <h3 class="font-semibold text-lg flex items-center gap-2">
+            <AppIcon name="document-text" class="w-5 h-5 text-primary" />
+            {{ previewTitle }}
+          </h3>
+          <button
+            class="btn btn-ghost btn-sm btn-square rounded-lg"
+            @click="showPreviewModal = false"
+          >
+            <AppIcon name="x" class="w-5 h-5" />
+          </button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-6 bg-base-200/50">
+          <div
+            class="bg-base-100 rounded-xl p-6 shadow-sm min-h-full font-mono text-sm whitespace-pre-wrap leading-relaxed"
+          >
+            {{ previewContent }}
+          </div>
+        </div>
+        <div class="p-4 border-t border-base-200 flex justify-end">
+          <button class="btn btn-primary btn-sm rounded-lg" @click="showPreviewModal = false">
+            {{ t('actions.close') }}
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showPreviewModal = false">close</button>
       </form>
     </dialog>
   </div>

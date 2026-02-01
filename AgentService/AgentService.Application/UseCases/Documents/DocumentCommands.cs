@@ -22,6 +22,7 @@ public record ListDocumentsQuery(
 ) : IRequest<ListDocumentsResponse>;
 
 public record GetDocumentQuery(Guid DocumentId) : IRequest<DocumentDetailDto?>;
+public record GetDocumentContentQuery(Guid DocumentId) : IRequest<string?>;
 
 public record DeleteDocumentCommand(Guid DocumentId, Guid? UserId) : IRequest<bool>;
 

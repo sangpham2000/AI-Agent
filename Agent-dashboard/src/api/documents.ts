@@ -47,7 +47,15 @@ export const documentsApi = {
   /**
    * Delete a document
    */
+  /**
+   * Delete a document
+   */
   delete: (id: string) => apiClient.delete(`/documents/${id}`),
+
+  /**
+   * Get document content
+   */
+  getContent: (id: string) => apiClient.get<{ content: string }>(`/documents/${id}/content`),
 }
 
 export default documentsApi

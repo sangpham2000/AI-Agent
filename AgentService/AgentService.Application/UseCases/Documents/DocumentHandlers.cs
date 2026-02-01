@@ -221,3 +221,31 @@ public class DeleteDocumentCommandHandler : IRequestHandler<DeleteDocumentComman
         return true;
     }
 }
+
+public class GetDocumentContentQueryHandler : IRequestHandler<GetDocumentContentQuery, string?>
+{
+    private readonly IApplicationDbContext _context;
+    private readonly IFileStorageService _fileStorage;
+
+    public GetDocumentContentQueryHandler(IApplicationDbContext context, IFileStorageService fileStorage)
+    {
+        _context = context;
+        _fileStorage = fileStorage;
+    }
+
+    public async Task<string?> Handle(GetDocumentContentQuery request, CancellationToken cancellationToken)
+    {
+        var document = await _context.Documents
+            .FirstOrDefaultAsync(d => d.Id == request.DocumentId, cancellationToken);
+
+        if (document == null || string.IsNullOrEmpty(document.FilePath))
+            return null;
+
+        var stream = await _fileStorage.GetFileStreamAsync(document.FilePath);
+        if (stream == null)
+            return null;
+
+        using var reader = new StreamReader(stream);
+        return await reader.ReadToEndAsync();
+    }
+}

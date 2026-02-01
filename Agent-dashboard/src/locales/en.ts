@@ -214,6 +214,10 @@ export default {
     viewAll: 'View All',
     edit: 'Edit',
     login: 'Sign In',
+    close: 'Close',
+    view: 'View',
+    cancel: 'Cancel',
+    dismiss: 'Dismiss',
   },
 
   sidebar: {

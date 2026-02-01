@@ -212,6 +212,10 @@ export default {
     viewAll: 'Xem tất cả',
     edit: 'Chỉnh sửa',
     login: 'Đăng nhập',
+    close: 'Đóng',
+    view: 'Xem',
+    cancel: 'Hủy',
+    dismiss: 'Bỏ qua',
   },
 
   sidebar: {

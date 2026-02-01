@@ -53,6 +53,21 @@ export const useDocumentsStore = defineStore('documents', () => {
     }
   }
 
+  async function fetchDocumentContent(id: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await documentsApi.getContent(id)
+      return response.data.content
+    } catch (e: any) {
+      // Don't set global error for this, just return null so UI handles it
+      console.error('Failed to fetch content', e)
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function uploadDocument(
     file: File,
     title?: string,
@@ -116,6 +131,7 @@ export const useDocumentsStore = defineStore('documents', () => {
     uploadProgress,
     fetchDocuments,
     fetchDocumentById,
+    fetchDocumentContent,
     uploadDocument,
     deleteDocument,
     clearMessages,

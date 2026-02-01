@@ -88,6 +88,28 @@ public class DocumentsController : ControllerBase
     }
 
     /// <summary>
+    /// Get document content (text)
+    /// </summary>
+    [HttpGet("{id:guid}/content")]
+    public async Task<ActionResult<string>> GetContent(Guid id)
+    {
+        var query = new GetDocumentContentQuery(id);
+        var content = await _mediator.Send(query);
+
+        if (content == null)
+            return NotFound("Content not found or file is missing.");
+
+        // For now returned as plain string. 
+        // In real world, we might want to respect Content-Type, 
+        // but frontend expects JSON or Text. 
+        // Since this is an API, let's wrap it object or returns text/plain? 
+        // Let's return Ok(new { content }) to be JSON safe?
+        // Or just Content(content)
+        
+        return Ok(new { content });
+    }
+
+    /// <summary>
     /// Delete a document
     /// </summary>
     [HttpDelete("{id:guid}")]
