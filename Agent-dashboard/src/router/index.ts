@@ -2,6 +2,15 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return {
+        el: to.hash,
+        behavior: 'smooth',
+      }
+    }
+    return savedPosition || { top: 0 }
+  },
   routes: [
     {
       path: '/',
@@ -11,26 +20,6 @@ const router = createRouter({
           path: '',
           name: 'landing',
           component: () => import('@/views/LandingView.vue'),
-        },
-        {
-          path: 'features',
-          name: 'features',
-          component: () => import('@/views/FeaturesView.vue'),
-        },
-        {
-          path: 'solutions',
-          name: 'solutions',
-          component: () => import('@/views/SolutionsView.vue'),
-        },
-        {
-          path: 'pricing',
-          name: 'pricing',
-          component: () => import('@/views/PricingView.vue'),
-        },
-        {
-          path: 'resources',
-          name: 'resources',
-          component: () => import('@/views/ResourcesView.vue'),
         },
       ],
     },
@@ -48,6 +37,12 @@ const router = createRouter({
           path: 'users',
           name: 'users',
           component: () => import('@/views/UsersView.vue'),
+          meta: { requiresAdmin: true },
+        },
+        {
+          path: 'agents',
+          name: 'agents',
+          component: () => import('@/views/AgentsView.vue'),
           meta: { requiresAdmin: true },
         },
         {
@@ -117,15 +112,7 @@ router.beforeEach(async (to, from, next) => {
     await authStore.initialize()
   }
 
-  const publicPages = [
-    '/',
-    '/login',
-    '/callback',
-    '/features',
-    '/solutions',
-    '/pricing',
-    '/resources',
-  ]
+  const publicPages = ['/', '/login', '/callback']
   const authRequired = !publicPages.includes(to.path)
 
   if (authRequired && !authStore.isAuthenticated) {

@@ -75,7 +75,7 @@ onMounted(async () => {
 
       <!-- Footer -->
       <footer class="py-3 px-5 text-center text-xs text-base-content/40 border-t border-base-200">
-        Built and designed with care by <a href="#" class="text-primary hover:underline">Phạm Thanh Sang</a>
+        Built and designed with care by <a href="https://github.com/sangpham2000" class="text-primary hover:underline" target="_blank">Phạm Thanh Sang</a>
       </footer>
     </div>
   </div>

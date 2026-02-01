@@ -1,19 +1,100 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useAuthStore } from '@/stores/auth'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js'
+import { Bar } from 'vue-chartjs'
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const { t, locale } = useI18n()
 
 const analyticsStore = useAnalyticsStore()
 const authStore = useAuthStore()
 
+const selectedTimeRange = ref(7)
+
 onMounted(async () => {
-  await analyticsStore.fetchAll()
+  await Promise.all([
+    analyticsStore.fetchAll(),
+    analyticsStore.fetchDailyMessageCounts(selectedTimeRange.value),
+  ])
 })
+
+watch(selectedTimeRange, async (newDays) => {
+  await analyticsStore.fetchDailyMessageCounts(newDays)
+})
+
+const chartData = computed(() => {
+  const isVi = locale.value === 'vi'
+  return {
+    labels: analyticsStore.dailyMessageCounts.map((item) =>
+      new Date(item.date).toLocaleDateString(isVi ? 'vi-VN' : 'en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+      }),
+    ),
+    datasets: [
+      {
+        label: t('dashboard.cards.conversations.title'),
+        backgroundColor: '#4f46e5', // Primary color
+        borderRadius: 4,
+        data: analyticsStore.dailyMessageCounts.map((item) => item.count),
+      },
+    ],
+  }
+})
+
+const chartOptions = computed(() => ({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: 12,
+      titleFont: { size: 13 },
+      bodyFont: { size: 13, weight: 'bold' as const },
+      cornerRadius: 8,
+      displayColors: false,
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: 'rgba(0, 0, 0, 0.05)',
+      },
+      ticks: {
+        font: { size: 10 },
+      },
+      border: { display: false },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        font: { size: 10 },
+      },
+      border: { display: false },
+    },
+  },
+}))
 
 const formatNumber = (num: number) => num.toLocaleString()
 const formatCompact = (num: number) => {
@@ -37,24 +118,12 @@ const timeAgo = (dateStr: string) => {
 }
 
 const totalMessagesThisWeek = computed(() => {
-  return analyticsStore.messagesThisWeek.reduce((a, b) => a + b, 0)
+  return analyticsStore.dailyMessageCounts.reduce((a, b) => a + b.count, 0)
 })
-
-const dayLabels = computed(() => {
-  const days = []
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    days.push(d.toLocaleDateString(locale.value === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short' }))
-  }
-  return days
-})
-const maxMessages = computed(() => Math.max(...analyticsStore.messagesThisWeek, 1))
 
 const averageMessagesPerDay = computed(() => {
-  if (!analyticsStore.messagesThisWeek.length) return 0
-  const total = analyticsStore.messagesThisWeek.reduce((a, b) => a + b, 0)
-  return Math.round(total / analyticsStore.messagesThisWeek.length)
+  if (!analyticsStore.dailyMessageCounts.length) return 0
+  return Math.round(totalMessagesThisWeek.value / analyticsStore.dailyMessageCounts.length)
 })
 
 const quickInsights = computed(() => [
@@ -70,36 +139,36 @@ const quickInsights = computed(() => [
   },
   {
     label: t('dashboard.growth'),
-    value: '+18.4%',
+    value: `${(analyticsStore.dashboardStats?.conversationGrowthRate || 0) > 0 ? '+' : ''}${analyticsStore.dashboardStats?.conversationGrowthRate || 0}%`,
     sublabel: t('dashboard.thisMonth'),
-    positive: true,
+    positive: (analyticsStore.dashboardStats?.conversationGrowthRate || 0) >= 0,
   },
 ])
 
 const systemMetrics = computed(() => [
   {
     label: t('dashboard.apiSuccessRate'),
-    value: '98%',
+    value: '99.9%', // Can be real later
     status: t('dashboard.stablePerformance'),
     statusColor: 'success',
   },
   {
     label: t('dashboard.responseTime'),
-    value: '200ms',
-    status: 'Acceptable', // Missing key for 'Acceptable', keeping English or adding ad-hoc? I'll leave as is or map.
+    value: '150ms', // Can be real later
+    status: 'Fast',
     statusColor: 'success',
   },
   {
     label: t('dashboard.aiPerformance'),
-    value: '350 tokens/req',
+    value: `${Math.round(analyticsStore.dashboardStats?.avgTokensPerResponse || 0)} tokens/res`,
     status: 'Efficient',
     statusColor: 'info',
   },
   {
     label: t('dashboard.serverLoad'),
-    value: '75%',
-    status: 'High Load',
-    statusColor: 'warning',
+    value: 'Normal',
+    status: 'Optimized',
+    statusColor: 'success',
   },
 ])
 </script>
@@ -229,47 +298,51 @@ const systemMetrics = computed(() => [
         <div class="flex items-center justify-between mb-6">
           <div>
             <h3 class="font-semibold flex items-center gap-2">
-              <AppIcon name="presentation-chart" class="w-4 h-4 text-primary" />
+              <AppIcon name="chart-bar" class="w-4 h-4 text-primary" />
               {{ t('dashboard.modelsOverview') }}
             </h3>
             <div class="flex items-baseline gap-2 mt-1">
-              <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek * 100) }}</p>
-              <span class="badge badge-sm badge-success bg-success/10 border-0">+3.14%</span>
+              <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek) }}</p>
+              <span
+                class="badge badge-sm border-0"
+                :class="
+                  (analyticsStore.dashboardStats?.conversationGrowthRate || 0) >= 0
+                    ? 'badge-success bg-success/10 text-success-content'
+                    : 'badge-error bg-error/10 text-error-content'
+                "
+              >
+                {{ (analyticsStore.dashboardStats?.conversationGrowthRate || 0) > 0 ? '+' : ''
+                }}{{ analyticsStore.dashboardStats?.conversationGrowthRate || 0 }}%
+              </span>
             </div>
             <p class="text-xs text-base-content/50">{{ t('dashboard.tokensProcessedToday') }}</p>
-          </div>
-          <div class="flex items-center gap-4 text-xs">
-            <select class="select select-sm select-bordered rounded-lg">
-              <option>This Month</option>
-              <option>Last Month</option>
-            </select>
+            <div class="flex items-center gap-4 text-xs">
+              <div class="dropdown dropdown-end">
+                <button
+                  tabindex="0"
+                  class="btn btn-ghost btn-sm rounded-lg gap-2 border border-base-300"
+                >
+                  {{ t('analytics.lastDays', { count: selectedTimeRange }) }}
+                  <AppIcon name="chevron-down" class="w-4 h-4" />
+                </button>
+                <ul
+                  tabindex="0"
+                  class="dropdown-content menu p-1.5 bg-base-100 rounded-xl shadow-lg border border-base-200 w-36 mt-1"
+                >
+                  <li v-for="days in [7, 14, 30, 90]" :key="days">
+                    <a class="text-sm rounded-lg" @click="selectedTimeRange = days">{{
+                      t('analytics.lastDays', { count: days })
+                    }}</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Simple line chart representation -->
-        <div class="h-48 flex items-end gap-1 pt-4 relative">
-          <div
-            v-for="(count, index) in analyticsStore.messagesThisWeek"
-            :key="index"
-            class="flex-1 flex flex-col items-center group relative"
-          >
-            <div
-              class="w-full bg-primary/80 rounded-t-sm transition-all group-hover:bg-primary group-hover:scale-y-105 origin-bottom"
-              :style="{ height: `${Math.max((count / maxMessages) * 100, 8)}%` }"
-            ></div>
-            <!-- Tooltip -->
-            <div
-              class="absolute -top-8 bg-base-300 text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              {{ formatNumber(count) }}
-            </div>
-          </div>
-          <!-- X-axis labels -->
-          <div
-            class="absolute -bottom-5 left-0 right-0 flex justify-between text-[10px] text-base-content/40 px-2"
-          >
-            <span v-for="day in dayLabels" :key="day">{{ day }}</span>
-          </div>
+        <!-- Chart JS -->
+        <div class="h-64 relative w-full">
+          <Bar :data="chartData" :options="chartOptions" />
         </div>
       </div>
 
@@ -330,34 +403,33 @@ const systemMetrics = computed(() => [
           </div>
           <div class="space-y-2">
             <div
+              v-for="model in analyticsStore.dashboardStats?.activeModels"
+              :key="model.name"
               class="flex items-center gap-3 p-2.5 rounded-xl bg-base-50 hover:bg-base-200/50 transition-colors border border-transparent hover:border-base-200 cursor-pointer"
+              :class="{ 'opacity-60': model.status === 'Inactive' }"
             >
               <div
-                class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary text-xs font-bold"
+                class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold"
+                :class="
+                  model.name.includes('GPT')
+                    ? 'bg-secondary/10 text-secondary'
+                    : 'bg-primary/10 text-primary'
+                "
               >
-                G
+                {{ model.name.substring(0, 2).toUpperCase() }}
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium">Gemini</p>
+                <p class="text-sm font-medium">{{ model.name }}</p>
                 <div class="flex items-center gap-2">
-                  <span class="badge badge-xs bg-success/10 text-success"> Active </span>
-                  <p class="text-[10px] text-base-content/50">Default</p>
-                </div>
-              </div>
-            </div>
-            <div
-              class="flex items-center gap-3 p-2.5 rounded-xl bg-base-50 hover:bg-base-200/50 transition-colors border border-transparent hover:border-base-200 cursor-pointer opacity-60"
-            >
-              <div
-                class="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary text-xs font-bold"
-              >
-                PT
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium">GPT-4o Mini</p>
-                <div class="flex items-center gap-2">
-                  <span class="badge badge-xs badge-ghost gap-1"> Inactive </span>
-                  <p class="text-[10px] text-base-content/50">Coming Soon</p>
+                  <span
+                    class="badge badge-xs"
+                    :class="
+                      model.status === 'Active' ? 'bg-success/10 text-success' : 'badge-ghost'
+                    "
+                  >
+                    {{ model.status }}
+                  </span>
+                  <p v-if="model.isDefault" class="text-[10px] text-base-content/50">Default</p>
                 </div>
               </div>
             </div>

@@ -4,9 +4,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="min-h-screen pt-24 pb-12 relative overflow-hidden">
-    <div class="absolute inset-0 bg-grid-pattern opacity-[0.3] z-0 pointer-events-none"></div>
-
+  <div class="py-24 relative bg-base-200/30">
     <div class="container mx-auto px-6 relative z-10">
       <div class="text-center max-w-3xl mx-auto mb-16">
         <h1 class="text-4xl md:text-5xl font-bold mb-6">

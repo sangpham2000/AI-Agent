@@ -4,6 +4,31 @@ import { useAnalyticsStore } from '@/stores/analytics'
 import AppIcon from '@/components/ui/AppIcon.vue'
 import { useI18n } from 'vue-i18n'
 import { formatDate } from '@/utils/format'
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  CategoryScale,
+  LinearScale,
+} from 'chart.js'
+import { Bar, Line, Doughnut } from 'vue-chartjs'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+)
 
 const { t } = useI18n()
 const analyticsStore = useAnalyticsStore()
@@ -52,6 +77,154 @@ const maxDaily = computed(() =>
   Math.max(...analyticsStore.dailyMessageCounts.map((d) => d.count), 1),
 )
 
+// --- Chart Options ---
+const commonOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      padding: 12,
+      titleFont: { size: 13 },
+      bodyFont: { size: 13, weight: 'bold' as const },
+      cornerRadius: 8,
+      displayColors: false,
+    },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      grid: { color: 'rgba(0, 0, 0, 0.05)' },
+      ticks: { font: { size: 10 } },
+      border: { display: false },
+    },
+    x: {
+      grid: { display: false },
+      ticks: { font: { size: 10 } },
+      border: { display: false },
+    },
+  },
+}
+
+// Specific options for Line Chart (smooth curves)
+const lineChartOptions = {
+  ...commonOptions,
+  elements: {
+    line: { tension: 0.4 }, // Smooth curve
+    point: { radius: 0, hoverRadius: 6 },
+  },
+  interaction: {
+    mode: 'index' as const,
+    intersect: false,
+  },
+}
+
+// Specific options for Doughnut
+const doughnutOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: { position: 'right' as const, labels: { usePointStyle: true, boxWidth: 8 } },
+    tooltip: commonOptions.plugins.tooltip,
+  },
+  cutout: '75%',
+}
+
+// --- Chart Data ---
+
+const conversationTrendsData = computed(() => ({
+  labels: analyticsStore.conversationTrends.map((t) =>
+    new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+  ),
+  datasets: [
+    {
+      label: 'Current Period',
+      data: analyticsStore.conversationTrends.map((t) => t.count),
+      borderColor: '#4f46e5', // Primary
+      backgroundColor: 'rgba(79, 70, 229, 0.1)',
+      fill: true,
+      tension: 0.4,
+    },
+    {
+      label: 'Previous Period',
+      data: analyticsStore.conversationTrends.map((t) => t.previousCount || 0),
+      borderColor: '#9ca3af', // Gray-400
+      backgroundColor: 'transparent',
+      borderDash: [5, 5],
+      pointRadius: 0,
+      borderWidth: 2,
+      tension: 0.4,
+    },
+  ],
+}))
+
+function exportToCSV() {
+  const headers = ['Date', 'Conversations (Current)', 'Conversations (Previous)', 'Messages']
+  const rows = analyticsStore.conversationTrends.map((t, index) => {
+    const msg = analyticsStore.dailyMessageCounts[index]?.count || 0
+    return [new Date(t.date).toLocaleDateString(), t.count, t.previousCount || 0, msg].join(',')
+  })
+
+  const csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n' + rows.join('\n')
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement('a')
+  link.setAttribute('href', encodedUri)
+  link.setAttribute('download', `analytics_export_${new Date().toISOString().split('T')[0]}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+}
+
+const dailyMessagesData = computed(() => ({
+  labels: analyticsStore.dailyMessageCounts.map((d) =>
+    new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+  ),
+  datasets: [
+    {
+      label: 'Messages',
+      data: analyticsStore.dailyMessageCounts.map((d) => d.count),
+      backgroundColor: '#ec4899', // Secondary (Pink-ish)
+      borderRadius: 4,
+    },
+  ],
+}))
+
+const platformDistributionData = computed(() => ({
+  labels: analyticsStore.platformDistribution.map((p) => p.platform),
+  datasets: [
+    {
+      data: analyticsStore.platformDistribution.map((p) => p.count),
+      backgroundColor: ['#4f46e5', '#0ea5e9', '#10b981'], // Primary, Info, Success
+      borderWidth: 0,
+    },
+  ],
+}))
+
+const weeklyPatternData = computed(() => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  // Map messagesThisWeek (last 7 days) to labels. Assuming messagesThisWeek is strictly last 7 days ending today.
+  // Ideally, we should dynamically generate labels based on today.
+  const labels = []
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    labels.push(d.toLocaleDateString('en-US', { weekday: 'short' }))
+  }
+
+  return {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Messages',
+        data: analyticsStore.messagesThisWeek,
+        backgroundColor: '#10b981', // Accent/Success
+        borderRadius: 4,
+      },
+    ],
+  }
+})
+
 async function refreshData() {
   await analyticsStore.fetchAll()
 }
@@ -80,7 +253,7 @@ async function changeQuestionLimit(limit: number) {
       </div>
       <div class="flex gap-2">
         <div class="dropdown dropdown-end">
-          <button tabindex="0" class="btn btn-ghost btn-sm rounded-lg gap-2">
+          <button tabindex="0" class="btn btn-ghost btn-sm rounded-lg gap-2 border border-base-300">
             {{ t('analytics.lastDays', { count: trendDays }) }}
             <AppIcon name="chevron-down" class="w-4 h-4" />
           </button>
@@ -105,6 +278,15 @@ async function changeQuestionLimit(limit: number) {
             </li>
           </ul>
         </div>
+
+        <button
+          class="btn btn-ghost btn-sm rounded-lg gap-2 border border-base-300"
+          @click="exportToCSV"
+        >
+          <AppIcon name="download" class="w-4 h-4" />
+          Export
+        </button>
+
         <button
           class="btn btn-primary btn-sm rounded-lg gap-2"
           @click="refreshData"
@@ -145,7 +327,20 @@ async function changeQuestionLimit(limit: number) {
           {{ t('analytics.todaysConversations') }}
         </p>
         <p class="text-2xl font-bold">{{ formatNumber(analyticsStore.conversationsToday) }}</p>
-        <p class="text-xs text-success mt-1">+12% vs yesterday</p>
+        <div class="flex items-center gap-1 mt-1">
+          <span
+            class="text-xs font-medium"
+            :class="
+              (analyticsStore.dashboardStats?.conversationGrowthRate || 0) >= 0
+                ? 'text-success'
+                : 'text-error'
+            "
+          >
+            {{ (analyticsStore.dashboardStats?.conversationGrowthRate || 0) > 0 ? '+' : ''
+            }}{{ analyticsStore.dashboardStats?.conversationGrowthRate || 0 }}%
+          </span>
+          <span class="text-xs text-base-content/40">vs last month</span>
+        </div>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
         <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
@@ -172,47 +367,51 @@ async function changeQuestionLimit(limit: number) {
     <!-- Charts Row 1 -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Conversation Trends -->
-      <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
+      <div class="bg-base-100 rounded-2xl p-5 border border-base-200 flex flex-col">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="trending-up" class="w-4 h-4 text-primary" />
             {{ t('analytics.conversationTrends') }}
           </h3>
-          <span class="badge badge-sm badge-primary badge-outline">{{
-            t('analytics.lastDays', { count: trendDays })
-          }}</span>
-        </div>
-        <div v-if="analyticsStore.isLoading" class="h-48 flex items-center justify-center">
-          <span class="loading loading-spinner loading-md text-primary"></span>
-        </div>
-        <div v-else class="h-48 flex items-end gap-1">
-          <div
-            v-for="(trend, index) in analyticsStore.conversationTrends"
-            :key="index"
-            class="flex-1 flex flex-col items-center gap-1 group relative"
-          >
-            <!-- Tooltip -->
-            <div
-              class="absolute -top-8 bg-base-300 text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10"
-            >
-              {{ trend.count }} conversations
-            </div>
-            <div
-              class="w-full bg-primary/20 hover:bg-primary rounded-t transition-all"
-              :style="{ height: `${Math.max((trend.count / maxTrend) * 100, 4)}%` }"
-            ></div>
+          <div class="flex gap-2">
+            <span class="badge badge-sm badge-ghost gap-1 text-[10px] text-base-content/50">
+              <span
+                class="w-2 h-0.5 bg-base-content/30 inline-block border-t border-dashed w-3"
+              ></span>
+              Previous
+            </span>
+            <span class="badge badge-sm badge-primary badge-outline">{{
+              t('analytics.lastDays', { count: trendDays })
+            }}</span>
           </div>
         </div>
-        <div
-          v-if="!analyticsStore.isLoading && !analyticsStore.conversationTrends.length"
-          class="h-48 flex items-center justify-center text-base-content/40 text-sm"
-        >
-          {{ t('analytics.noData') }}
+        <div class="flex-1 w-full min-h-[200px] relative">
+          <div
+            v-if="!analyticsStore.isLoading && !analyticsStore.conversationTrends.length"
+            class="absolute inset-0 flex flex-col items-center justify-center text-base-content/40"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-16 w-16 mb-2 opacity-20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
+            <span class="text-sm font-medium">{{ t('analytics.noData') }}</span>
+          </div>
+          <Line v-else :data="conversationTrendsData" :options="lineChartOptions" />
         </div>
       </div>
 
       <!-- Daily Messages -->
-      <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
+      <div class="bg-base-100 rounded-2xl p-5 border border-base-200 flex flex-col">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="chat-alt" class="w-4 h-4 text-secondary" />
@@ -222,100 +421,47 @@ async function changeQuestionLimit(limit: number) {
             t('analytics.lastDays', { count: trendDays })
           }}</span>
         </div>
-        <div v-if="analyticsStore.isLoading" class="h-48 flex items-center justify-center">
-          <span class="loading loading-spinner loading-md text-secondary"></span>
-        </div>
-        <div v-else class="h-48 flex items-end gap-1">
+        <div class="flex-1 w-full min-h-[200px] relative">
           <div
-            v-for="(day, index) in analyticsStore.dailyMessageCounts"
-            :key="index"
-            class="flex-1 flex flex-col items-center gap-1 group relative"
+            v-if="!analyticsStore.isLoading && !analyticsStore.dailyMessageCounts.length"
+            class="absolute inset-0 flex flex-col items-center justify-center text-base-content/40"
           >
-            <!-- Tooltip -->
-            <div
-              class="absolute -top-8 bg-base-300 text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10"
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-16 w-16 mb-2 opacity-20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              {{ day.count }} messages
-            </div>
-            <div
-              class="w-full bg-secondary/20 hover:bg-secondary rounded-t transition-all"
-              :style="{ height: `${Math.max((day.count / maxDaily) * 100, 4)}%` }"
-            ></div>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
+            <span class="text-sm font-medium">{{ t('analytics.noData') }}</span>
           </div>
-        </div>
-        <div
-          v-if="!analyticsStore.isLoading && !analyticsStore.dailyMessageCounts.length"
-          class="h-48 flex items-center justify-center text-base-content/40 text-sm"
-        >
-          {{ t('analytics.noData') }}
+          <Bar v-else :data="dailyMessagesData" :options="commonOptions" />
         </div>
       </div>
     </div>
 
     <!-- Charts Row 2 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Platform Distribution -->
-      <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
+      <div class="bg-base-100 rounded-2xl p-5 border border-base-200 lg:col-span-1 flex flex-col">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="globe-alt" class="w-4 h-4 text-info" />
           {{ t('analytics.platformDistribution') }}
         </h3>
-        <div v-if="analyticsStore.isLoading" class="space-y-3">
-          <div v-for="i in 3" :key="i" class="h-10 bg-base-200 rounded-lg animate-pulse"></div>
-        </div>
-        <div v-else class="space-y-4">
-          <div
-            v-for="(platform, index) in analyticsStore.platformDistribution"
-            :key="platform.platform"
-            class="space-y-1.5"
-          >
-            <div class="flex items-center justify-between text-sm">
-              <span class="capitalize flex items-center gap-2">
-                <AppIcon
-                  v-if="platform.platform === 'web'"
-                  name="desktop-computer"
-                  class="w-4 h-4 text-primary"
-                />
-                <AppIcon
-                  v-else-if="platform.platform === 'telegram'"
-                  name="paper-airplane"
-                  class="w-4 h-4 text-info"
-                />
-                <AppIcon v-else name="terminal" class="w-4 h-4 text-accent" />
-                {{ platform.platform }}
-              </span>
-              <span class="font-medium"
-                >{{ platform.count }}
-                <span class="text-xs text-base-content/50"
-                  >({{
-                    ((platform.count / (analyticsStore.totalConversations || 1)) * 100).toFixed(1)
-                  }}%)</span
-                ></span
-              >
-            </div>
-            <div class="h-2 bg-base-200 rounded-full overflow-hidden">
-              <div
-                :class="[
-                  'h-full rounded-full',
-                  index === 0 ? 'bg-primary' : index === 1 ? 'bg-info' : 'bg-secondary',
-                ]"
-                :style="{
-                  width: `${(platform.count / (analyticsStore.totalConversations || 1)) * 100}%`,
-                }"
-              ></div>
-            </div>
-          </div>
-          <div
-            v-if="!analyticsStore.platformDistribution.length"
-            class="text-center py-8 text-base-content/40 text-sm"
-          >
-            {{ t('analytics.noData') }}
-          </div>
+        <div class="flex-1 w-full min-h-[200px] relative flex items-center justify-center">
+          <Doughnut :data="platformDistributionData" :options="doughnutOptions" />
         </div>
       </div>
 
       <!-- Weekly Pattern -->
-      <div class="bg-base-100 rounded-2xl p-5 border border-base-200">
+      <div class="bg-base-100 rounded-2xl p-5 border border-base-200 lg:col-span-2 flex flex-col">
         <div class="flex items-center justify-between mb-4">
           <h3 class="font-semibold flex items-center gap-2">
             <AppIcon name="calendar" class="w-4 h-4 text-accent" />
@@ -325,19 +471,8 @@ async function changeQuestionLimit(limit: number) {
             t('analytics.thisWeek') || 'This week'
           }}</span>
         </div>
-        <div class="h-40 flex items-end justify-between gap-2">
-          <div
-            v-for="(count, index) in analyticsStore.messagesThisWeek"
-            :key="index"
-            class="flex-1 flex flex-col items-center gap-1"
-          >
-            <span class="text-[10px] font-medium text-base-content/50">{{ count }}</span>
-            <div
-              class="w-full bg-accent/20 hover:bg-accent rounded-t transition-all"
-              :style="{ height: `${Math.max((count / maxMessages) * 100, 8)}%` }"
-            ></div>
-            <span class="text-[10px] text-base-content/40">{{ dayLabels[index] }}</span>
-          </div>
+        <div class="flex-1 w-full min-h-[200px] relative">
+          <Bar :data="weeklyPatternData" :options="commonOptions" />
         </div>
       </div>
     </div>
@@ -505,17 +640,21 @@ async function changeQuestionLimit(limit: number) {
       <div class="bg-base-100 rounded-2xl p-5 border border-base-200/50">
         <h3 class="font-semibold mb-4 flex items-center gap-2">
           <AppIcon name="lightning-bolt" class="w-4 h-4" />
-          {{ t('analytics.avgResponseTime') }}
+          {{ t('dashboard.aiPerformance') }}
         </h3>
         <div class="flex flex-col items-center">
-          <p class="text-4xl font-bold text-accent">1.2s</p>
+          <p class="text-4xl font-bold text-accent">
+            {{
+              formatCompact(Math.round(analyticsStore.dashboardStats?.avgTokensPerResponse || 0))
+            }}
+          </p>
           <div
             class="flex items-center gap-1 mt-3 text-success text-sm bg-success/10 px-2 py-1 rounded-lg"
           >
-            <AppIcon name="trending-up" class="w-3.5 h-3.5" />
-            <span>{{ t('analytics.fasterVsLastWeek', { percent: 15 }) }}</span>
+            <AppIcon name="chip" class="w-3.5 h-3.5" />
+            <span>tokens/response</span>
           </div>
-          <p class="text-xs text-base-content/50 mt-1">vs last week</p>
+          <p class="text-xs text-base-content/50 mt-1">Average usage</p>
         </div>
       </div>
     </div>

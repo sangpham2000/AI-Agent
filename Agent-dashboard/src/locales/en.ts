@@ -64,6 +64,70 @@ export default {
     },
   },
 
+  featuresPage: {
+    title: 'Features',
+    highlight: 'Powerful',
+    subtitle: 'Everything you need to build, deploy, and scale intelligent AI agents.',
+    cards: {
+      title: 'Feature',
+      description: 'Advanced capabilities to enhance your assistant workflows and efficiency.',
+    },
+  },
+
+  solutionsPage: {
+    title: 'Solutions',
+    highlight: 'Industries',
+    subtitle: 'AI agent architecture tailored for every sector.',
+    education: {
+      title: 'Education',
+      description: 'Personalized tutors, administrative automation, and research assistants.',
+    },
+    enterprise: {
+      title: 'Enterprise',
+      description: 'Internal knowledge retrieval, customer support automation, and data analytics.',
+    },
+    learnMore: 'Learn More',
+  },
+
+  pricingPage: {
+    title: 'Pricing',
+    highlight: 'Simple',
+    subtitle: 'Start for free, scale as you grow.',
+    starter: {
+      title: 'Starter',
+      price: '$0',
+      features: ['1 Agent', '1,000 Messages/month', 'Community Support'],
+    },
+    pro: {
+      title: 'Pro',
+      price: '$29',
+      tag: 'POPULAR',
+      features: ['5 Agents', '50,000 Messages/month', 'Priority Support', 'Advanced Analytics'],
+      cta: 'Start Free Trial',
+    },
+    enterprise: {
+      title: 'Enterprise',
+      price: 'Contact',
+      features: ['Unlimited Agents', 'Custom Limits', 'SLA & Dedicated Support'],
+      cta: 'Contact Sales',
+    },
+    getStarted: 'Get Started',
+    month: '/month',
+  },
+
+  resourcesPage: {
+    title: 'Resources',
+    highlight: 'Learning',
+    subtitle: 'Documentation, guides, and community.',
+    cards: {
+      documentation: 'Documentation',
+      apiReference: 'API Reference',
+      blog: 'Blog',
+      community: 'Community',
+      description: 'Explore our comprehensive {item} to get the most out of the platform.',
+    },
+  },
+
   // Login page
   login: {
     title: 'Login',
@@ -90,8 +154,8 @@ export default {
     processingPower: 'Processing Power',
     performancePeak: 'Performance at peak',
     serverLoad: 'Server Load',
-    modelsOverview: 'Models Overview',
-    tokensProcessedToday: 'Tokens processed today',
+    modelsOverview: 'Weekly Activity Trends',
+    tokensProcessedToday: 'Messages sent this week',
     systemStatus: 'System Status',
     activeUsers: 'Active Users',
     totalUsers: 'Total Users',
@@ -160,6 +224,7 @@ export default {
     analytics: 'Analytics',
     users: 'Users',
     roles: 'Roles & Permissions',
+    agents: 'AI Agents',
     documents: 'Documents',
     conversations: 'Conversations',
     chatDemo: 'Chat Demo',

@@ -10,6 +10,16 @@ export interface DashboardStats {
   messagesThisWeek: number[]
   conversationsByPlatform: PlatformDistribution[]
   recentActivities: RecentActivity[]
+  conversationGrowthRate: number
+  tokenUseGrowthRate: number
+  avgTokensPerResponse: number
+  activeModels: ActiveModel[]
+}
+
+export interface ActiveModel {
+  name: string
+  status: string
+  isDefault: boolean
 }
 
 export interface PlatformDistribution {
@@ -28,6 +38,7 @@ export interface RecentActivity {
 export interface ConversationTrend {
   date: string
   count: number
+  previousCount?: number
 }
 
 export interface PopularQuestion {
