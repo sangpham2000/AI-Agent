@@ -14,6 +14,9 @@ const router = useRouter()
 const authStore = useAuthStore()
 const conversationsStore = useConversationsStore()
 const { t } = useI18n()
+import { inject } from 'vue'
+const isSidebarOpen = inject('isSidebarOpen') as any
+const toggleSidebar = inject('toggleSidebar') as any
 
 const md = new MarkdownIt({
   html: false,
@@ -169,9 +172,17 @@ function renderMessageContent(content: string) {
   <div class="flex-1 flex flex-col h-full overflow-hidden bg-base-100 relative">
     <!-- Chat Header -->
     <div
-      class="flex-none h-14 px-6 border-b border-base-200 flex items-center justify-between bg-base-100/90 backdrop-blur-sm z-10 sticky top-0"
+      class="flex-none h-14 px-4 border-b border-base-200 flex items-center justify-between bg-base-100/90 backdrop-blur-sm z-10 sticky top-0"
     >
       <div class="flex items-center gap-3">
+        <button
+          v-if="!isSidebarOpen"
+          @click="toggleSidebar"
+          class="btn btn-ghost btn-xs btn-square -ml-2"
+          :title="t('actions.openSidebar')"
+        >
+          <AppIcon name="chevron-double-right" class="w-4 h-4" />
+        </button>
         <h2 class="font-semibold text-sm text-base-content">{{ t('chat.header') }}</h2>
         <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10">
           <span class="relative flex h-1.5 w-1.5">
@@ -182,10 +193,6 @@ function renderMessageContent(content: string) {
           </span>
           <span class="text-[10px] text-success font-medium">{{ t('chat.online') }}</span>
         </div>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- Model selector removed -->
       </div>
     </div>
 
@@ -213,58 +220,156 @@ function renderMessageContent(content: string) {
         class="flex-1 overflow-y-auto px-4 sm:px-0 py-6 scroll-smooth custom-scrollbar"
       >
         <div class="max-w-3xl mx-auto flex flex-col gap-6">
-          <!-- Welcome Message -->
+          <!-- Welcome Message - Gemini Style -->
           <div
             v-if="messages.length === 0"
-            class="flex flex-col items-center justify-center py-16 text-center"
+            class="flex flex-col items-center justify-center py-12 text-center"
           >
-            <div class="w-12 h-12 rounded-xl bg-base-200 flex items-center justify-center mb-6">
-              <AppIcon name="sparkles" class="w-6 h-6 text-base-content" />
+            <!-- Greeting -->
+            <div class="mb-8">
+              <p class="flex items-center justify-center gap-2 text-base text-base-content/70 mb-3">
+                <AppIcon name="sparkles" class="w-5 h-5 text-primary" />
+                {{
+                  new Date().getHours() < 12
+                    ? t('chat.welcome.morning')
+                    : new Date().getHours() < 18
+                      ? t('chat.welcome.afternoon')
+                      : t('chat.welcome.evening')
+                }}, {{ authStore.user?.profile?.name?.split(' ')[0] || 'User' }}!
+              </p>
+              <h2 class="text-2xl sm:text-3xl font-medium text-base-content">
+                {{ t('chat.welcome.question') }}
+              </h2>
             </div>
 
-            <h3 class="text-xl font-medium mb-2 text-base-content">
-              {{
-                new Date().getHours() < 12
-                  ? t('chat.welcome.morning')
-                  : new Date().getHours() < 18
-                    ? t('chat.welcome.afternoon')
-                    : t('chat.welcome.evening')
-              }}, {{ authStore.user?.profile?.name?.split(' ')[0] || 'User' }}
-            </h3>
-            <p class="text-base-content/60 max-w-sm mx-auto mb-10 text-sm">
-              {{ t('chat.welcome.help') }}
-            </p>
-
-            <div class="grid grid-cols-2 gap-2 w-full max-w-[400px]">
+            <!-- Quick Actions - Chips Style -->
+            <div class="flex flex-wrap justify-center gap-2 max-w-xl">
               <button
                 v-for="(action, idx) in [
-                  { icon: 'chart-bar', label: t('chat.actions.analyze'), text: 'Analyze trends' },
+                  {
+                    icon: 'sparkles',
+                    label: t('chat.actions.image'),
+                    text: 'Tạo hình ảnh cho tôi',
+                    iconClass: 'text-warning',
+                  },
+                  {
+                    icon: 'code-bracket',
+                    label: t('chat.actions.code'),
+                    text: 'Giải thích code này',
+                  },
                   {
                     icon: 'document-text',
-                    label: t('chat.actions.report'),
-                    text: 'Draft a report',
+                    label: t('chat.actions.write'),
+                    text: 'Viết bất cứ thứ gì',
                   },
-                  { icon: 'code-bracket', label: t('chat.actions.code'), text: 'Explain code' },
+                  { icon: 'light-bulb', label: t('chat.actions.help'), text: 'Giúp tôi học' },
                   {
-                    icon: 'light-bulb',
-                    label: t('chat.actions.brainstorm'),
-                    text: 'Brainstorm ideas',
+                    icon: 'chart-bar',
+                    label: t('chat.actions.analyze'),
+                    text: 'Phân tích dữ liệu',
                   },
                 ]"
                 :key="idx"
                 @click="setQuickAction(action.text)"
-                class="group p-3 text-left bg-transparent hover:bg-base-200 rounded-xl border border-base-300 hover:border-base-content/20 transition-all flex items-center gap-3"
+                class="group px-4 py-2.5 bg-base-100 hover:bg-base-200 rounded-full border border-base-200 hover:border-base-300 transition-all flex items-center gap-2 shadow-sm"
               >
                 <AppIcon
                   :name="action.icon"
-                  class="w-4 h-4 text-base-content/40 group-hover:text-base-content/60"
+                  :class="[
+                    'w-4 h-4',
+                    action.iconClass || 'text-base-content/50 group-hover:text-base-content/70',
+                  ]"
                 />
-                <span
-                  class="text-xs font-medium text-base-content/60 group-hover:text-base-content"
-                >
+                <span class="text-sm text-base-content/70 group-hover:text-base-content">
                   {{ action.label }}
                 </span>
               </button>
+            </div>
+
+            <!-- Centered Input Box for Welcome State -->
+            <div class="w-full max-w-2xl mt-8">
+              <div
+                class="bg-base-100 rounded-2xl border border-base-200 shadow-sm p-2 relative transition-all duration-300 ring-4 ring-transparent focus-within:ring-base-200 focus-within:border-base-300"
+              >
+                <div class="flex items-end gap-2">
+                  <textarea
+                    ref="textareaRef"
+                    v-model="message"
+                    @keydown.enter.exact.prevent="sendMessage"
+                    @input="
+                      (e) => {
+                        const target = e.target as HTMLTextAreaElement
+                        target.style.height = 'auto'
+                        target.style.height = Math.min(target.scrollHeight, 150) + 'px'
+                      }
+                    "
+                    class="block w-full bg-transparent border-0 focus:ring-0 p-3 min-h-[44px] max-h-[150px] resize-none text-base-content placeholder:text-base-content/40 custom-scrollbar text-sm leading-relaxed"
+                    :placeholder="t('chat.input.placeholder')"
+                    :disabled="isLoading"
+                    rows="1"
+                  ></textarea>
+
+                  <div class="flex items-center gap-1 pb-1.5 pr-1.5">
+                    <!-- Model Selector -->
+                    <div
+                      class="dropdown dropdown-top dropdown-end mr-1"
+                      v-if="authStore.isAuthenticated"
+                    >
+                      <div
+                        tabindex="0"
+                        role="button"
+                        class="btn btn-xs btn-ghost gap-1 font-normal text-xs text-base-content/60 hover:text-base-content hover:bg-base-200 h-8 px-2 rounded-lg"
+                      >
+                        {{ selectedModel }}
+                        <AppIcon name="chevron-down" class="w-3 h-3 opacity-50" />
+                      </div>
+                      <ul
+                        tabindex="0"
+                        class="dropdown-content z-[1] menu p-1 shadow-lg bg-base-100 rounded-xl border border-base-200 w-32 mb-2"
+                      >
+                        <li>
+                          <button
+                            @click="selectedModel = 'Gemini'"
+                            :class="{ active: selectedModel === 'Gemini' }"
+                            class="text-xs py-2 rounded-lg"
+                          >
+                            Gemini
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            @click="selectedModel = 'OpenAI'"
+                            :class="{ active: selectedModel === 'OpenAI' }"
+                            class="text-xs py-2 rounded-lg"
+                          >
+                            OpenAI
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div class="w-px h-4 bg-base-content/10 mx-1"></div>
+
+                    <button
+                      class="btn btn-circle btn-xs btn-ghost text-base-content/40 hover:text-base-content/60 hover:bg-base-200 transition-colors"
+                      title="Attach file"
+                    >
+                      <AppIcon name="paper-clip" class="w-4 h-4" />
+                    </button>
+                    <button
+                      @click="sendMessage"
+                      class="btn btn-sm btn-square rounded-lg bg-base-content hover:bg-base-content/90 text-base-100 transition-all duration-200 disabled:bg-base-300 disabled:text-base-content/40"
+                      :disabled="isLoading || !message.trim()"
+                    >
+                      <AppIcon name="arrow-up" class="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p class="text-[10px] text-center text-base-content/40 mt-3 font-medium">
+                {{ t('chat.input.disclaimer') }}
+              </p>
             </div>
           </div>
 
@@ -348,12 +453,15 @@ function renderMessageContent(content: string) {
           </div>
         </div>
 
-        <!-- Spacer for bottom input -->
-        <div class="h-32"></div>
+        <!-- Spacer for bottom input (only when has messages) -->
+        <div v-if="messages.length > 0" class="h-32"></div>
       </div>
 
-      <!-- Input Floating Area -->
-      <div class="absolute bottom-6 left-0 right-0 px-4 z-20">
+      <!-- Input Floating Area (only when has messages) -->
+      <div
+        v-if="messages.length > 0"
+        class="absolute bottom-0 left-0 right-0 px-4 z-20 bg-gradient-to-t from-base-100 via-base-100/80 to-transparent pt-10 pb-6"
+      >
         <div class="max-w-3xl mx-auto">
           <div
             class="bg-base-100 rounded-2xl border border-base-200 shadow-sm p-2 relative transition-all duration-300 ring-4 ring-transparent focus-within:ring-base-200 focus-within:border-base-300"

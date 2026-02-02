@@ -199,14 +199,6 @@ function toggleTheme() {
               Profile
             </router-link>
           </li>
-          <li>
-            <a
-              class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm hover:bg-base-200/60 font-medium"
-            >
-              <AppIcon name="cog" class="w-4 h-4 opacity-70" />
-              Settings
-            </a>
-          </li>
           <li class="my-1"><div class="h-px bg-base-200 mx-2"></div></li>
           <li>
             <a

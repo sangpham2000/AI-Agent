@@ -170,7 +170,7 @@ function getFileIcon(fileType: string): string {
     </div>
 
     <!-- Alerts -->
-    <div v-if="documentsStore.error" class="alert alert-error text-sm py-3 rounded-xl">
+    <div v-if="documentsStore.error" class="alert alert-soft alert-error text-sm py-3 rounded-xl">
       <AppIcon name="exclamation" class="w-5 h-5" />
       <span>{{ documentsStore.error }}</span>
       <button class="btn btn-ghost btn-xs" @click="documentsStore.clearMessages()">
@@ -224,14 +224,14 @@ function getFileIcon(fileType: string): string {
         </div>
         <select
           v-model="categoryFilter"
-          class="select select-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none"
+          class="select select-sm w-full sm:w-36 bg-base-100 border border-base-200 rounded-xl focus:border-primary focus:outline-none"
         >
           <option value="">{{ t('documents.allCategories') }}</option>
           <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
         <select
           v-model="processedFilter"
-          class="select select-sm w-full sm:w-32 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none"
+          class="select select-sm w-full sm:w-32 bg-base-100 border border-base-200 rounded-xl focus:border-primary focus:outline-none"
         >
           <option value="all">{{ t('documents.allStatus') }}</option>
           <option value="processed">{{ t('documents.processed') }}</option>

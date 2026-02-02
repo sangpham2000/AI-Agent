@@ -14,7 +14,7 @@ public class User
     public DateTime? LastLoginAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ICollection<AgentService.Domain.Entities.Auth.UserRole> UserRoles { get; set; } = new List<AgentService.Domain.Entities.Auth.UserRole>();
+    public ICollection<Auth.UserRole> UserRoles { get; set; } = new List<Auth.UserRole>();
 
     public string? StudentId { get; set; }
     public UserType UserType { get; set; } = UserType.Unknown;

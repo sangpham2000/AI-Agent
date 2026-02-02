@@ -295,49 +295,51 @@ const systemMetrics = computed(() => [
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
       <!-- Models Overview Chart -->
       <div class="xl:col-span-2 bg-base-100 rounded-2xl p-5 border border-base-200">
-        <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center justify-between mb-4">
           <div>
             <h3 class="font-semibold flex items-center gap-2">
               <AppIcon name="chart-bar" class="w-4 h-4 text-primary" />
               {{ t('dashboard.modelsOverview') }}
             </h3>
-            <div class="flex items-baseline gap-2 mt-1">
-              <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek) }}</p>
-              <span
-                class="badge badge-sm border-0"
-                :class="
-                  (analyticsStore.dashboardStats?.conversationGrowthRate || 0) >= 0
-                    ? 'badge-success bg-success/10 text-success-content'
-                    : 'badge-error bg-error/10 text-error-content'
-                "
-              >
-                {{ (analyticsStore.dashboardStats?.conversationGrowthRate || 0) > 0 ? '+' : ''
-                }}{{ analyticsStore.dashboardStats?.conversationGrowthRate || 0 }}%
-              </span>
-            </div>
-            <p class="text-xs text-base-content/50">{{ t('dashboard.tokensProcessedToday') }}</p>
-            <div class="flex items-center gap-4 text-xs">
-              <div class="dropdown dropdown-end">
-                <button
-                  tabindex="0"
-                  class="btn btn-ghost btn-sm rounded-lg gap-2 border border-base-300"
-                >
-                  {{ t('analytics.lastDays', { count: selectedTimeRange }) }}
-                  <AppIcon name="chevron-down" class="w-4 h-4" />
-                </button>
-                <ul
-                  tabindex="0"
-                  class="dropdown-content menu p-1.5 bg-base-100 rounded-xl shadow-lg border border-base-200 w-36 mt-1"
-                >
-                  <li v-for="days in [7, 14, 30, 90]" :key="days">
-                    <a class="text-sm rounded-lg" @click="selectedTimeRange = days">{{
-                      t('analytics.lastDays', { count: days })
-                    }}</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
+            <p class="text-xs text-base-content/50 mt-1">
+              {{ t('dashboard.tokensProcessedToday') }}
+            </p>
           </div>
+
+          <div class="dropdown dropdown-end">
+            <button
+              tabindex="0"
+              class="btn btn-ghost btn-sm rounded-lg gap-2 border border-base-300"
+            >
+              {{ t('analytics.lastDays', { count: selectedTimeRange }) }}
+              <AppIcon name="chevron-down" class="w-4 h-4" />
+            </button>
+            <ul
+              tabindex="0"
+              class="dropdown-content menu p-1.5 bg-base-100 rounded-xl shadow-lg border border-base-200 w-36 mt-1"
+            >
+              <li v-for="days in [7, 14, 30, 90]" :key="days">
+                <a class="text-sm rounded-lg" @click="selectedTimeRange = days">{{
+                  t('analytics.lastDays', { count: days })
+                }}</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex items-baseline gap-2 mb-6">
+          <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek) }}</p>
+          <span
+            class="badge badge-sm border-0"
+            :class="
+              (analyticsStore.dashboardStats?.conversationGrowthRate || 0) >= 0
+                ? 'badge-success bg-success/10 text-success-content'
+                : 'badge-error bg-error/10 text-error-content'
+            "
+          >
+            {{ (analyticsStore.dashboardStats?.conversationGrowthRate || 0) > 0 ? '+' : ''
+            }}{{ analyticsStore.dashboardStats?.conversationGrowthRate || 0 }}%
+          </span>
         </div>
 
         <!-- Chart JS -->

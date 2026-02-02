@@ -137,7 +137,10 @@ function renderMessageContent(content: string) {
     </div>
 
     <!-- Alerts -->
-    <div v-if="conversationsStore.error" class="alert alert-error text-sm py-3">
+    <div
+      v-if="conversationsStore.error"
+      class="alert alert-soft alert-error text-sm py-3 rounded-xl"
+    >
       <span>{{ conversationsStore.error }}</span>
       <button class="btn btn-ghost btn-xs" @click="conversationsStore.clearError()">
         {{ t('actions.dismiss') }}
@@ -147,17 +150,24 @@ function renderMessageContent(content: string) {
     <!-- Stats -->
     <div class="grid grid-cols-3 gap-4">
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">
+        <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
+          <AppIcon name="chat" class="w-3.5 h-3.5" />
           {{ t('conversations.totalConversations') }}
         </p>
         <p class="text-2xl font-bold">{{ conversationsStore.totalCount }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">{{ t('conversations.totalMessages') }}</p>
+        <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
+          <AppIcon name="envelope" class="w-3.5 h-3.5" />
+          {{ t('conversations.totalMessages') }}
+        </p>
         <p class="text-2xl font-bold">{{ conversationsStore.totalMessages }}</p>
       </div>
       <div class="bg-base-100 rounded-2xl p-4 border border-base-200">
-        <p class="text-xs text-base-content/50 mb-1">{{ t('conversations.avgMessages') }}</p>
+        <p class="text-xs text-base-content/50 mb-1 flex items-center gap-1.5">
+          <AppIcon name="chart-bar" class="w-3.5 h-3.5" />
+          {{ t('conversations.avgMessages') }}
+        </p>
         <p class="text-2xl font-bold">
           {{ conversationsStore.averageMessagesPerConversation.toFixed(1) }}
         </p>
@@ -186,12 +196,12 @@ function renderMessageContent(content: string) {
             v-model="searchQuery"
             type="text"
             :placeholder="t('conversations.searchPlaceholder')"
-            class="input input-sm w-full pl-9 bg-base-200/50 border-0 rounded-lg"
+            class="input input-sm w-full pl-9 bg-base-200/50 border-0 rounded-xl focus:bg-base-200 focus:outline-none transition-all"
           />
         </div>
         <select
           v-model="platformFilter"
-          class="select select-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
+          class="select select-sm w-full sm:w-36 bg-base-100 border border-base-200 rounded-xl focus:border-primary focus:outline-none"
         >
           <option value="">{{ t('conversations.allPlatforms') }}</option>
           <option value="web">Web</option>
@@ -201,13 +211,13 @@ function renderMessageContent(content: string) {
         <input
           v-model="dateFrom"
           type="date"
-          class="input input-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
+          class="input input-sm w-full sm:w-36 bg-base-100 border border-base-200 rounded-xl focus:border-primary focus:outline-none"
           :placeholder="t('conversations.from')"
         />
         <input
           v-model="dateTo"
           type="date"
-          class="input input-sm w-full sm:w-36 bg-base-200/50 border-0 rounded-lg"
+          class="input input-sm w-full sm:w-36 bg-base-100 border border-base-200 rounded-xl focus:border-primary focus:outline-none"
           :placeholder="t('conversations.to')"
         />
       </div>
@@ -302,27 +312,13 @@ function renderMessageContent(content: string) {
               </td>
               <td class="text-sm text-base-content/60">{{ formatDate(conv.startedAt) }}</td>
               <td>
-                <button class="btn btn-ghost btn-xs btn-square">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.75"
+                <div class="flex items-center gap-1">
+                  <button
+                    class="btn btn-ghost btn-xs btn-square text-base-content/70 hover:text-primary hover:bg-primary/10 rounded-lg"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </button>
+                    <AppIcon name="eye" class="w-4 h-4" />
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -423,50 +419,35 @@ function renderMessageContent(content: string) {
 
                 <template v-else-if="selectedConversation">
                   <!-- User Info Card -->
-                  <div
-                    class="flex items-center gap-4 p-4 bg-base-200/50 rounded-2xl mb-8 border border-base-200"
-                  >
-                    <div class="avatar placeholder">
+                  <div class="bg-base-100 rounded-2xl border border-base-200 p-5 mb-6">
+                    <div class="flex items-center gap-4">
+                      <!-- Avatar -->
                       <div
-                        class="bg-gradient-to-br from-primary to-primary-focus text-primary-content w-12 rounded-xl shadow-sm"
+                        class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg"
                       >
-                        <span class="text-lg font-bold">{{
-                          (selectedConversation.userName || 'U').charAt(0).toUpperCase()
-                        }}</span>
+                        {{ (selectedConversation.userName || 'U').charAt(0).toUpperCase() }}
                       </div>
-                    </div>
-                    <div>
-                      <p class="font-bold text-base">
-                        {{ selectedConversation.userName || 'Unknown User' }}
-                      </p>
-                      <p class="text-xs text-base-content/60">
-                        {{ selectedConversation.userEmail || 'No email' }}
-                      </p>
-                    </div>
-                    <div class="ml-auto text-right">
-                      <p
-                        class="text-[10px] text-base-content/40 uppercase font-semibold tracking-wider mb-0.5"
-                      >
-                        {{ t('conversations.detail.summary') }}
-                      </p>
-                      <div class="flex items-center gap-2 justify-end text-sm font-medium">
-                        <span
-                          class="flex items-center gap-1.5 bg-base-100 px-2 py-1 rounded-lg border border-base-200 shadow-sm"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-3.5 w-3.5 text-primary"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                          {{ selectedConversation.messages?.length || 0 }}
-                        </span>
+
+                      <!-- User Info -->
+                      <div class="flex-1 min-w-0">
+                        <p class="font-semibold truncate">
+                          {{ selectedConversation.userName || 'Unknown User' }}
+                        </p>
+                        <p class="text-sm text-base-content/50 truncate">
+                          {{ selectedConversation.userEmail || 'No email' }}
+                        </p>
+                      </div>
+
+                      <!-- Stats -->
+                      <div class="flex items-center gap-3">
+                        <div class="text-center px-3 py-2 bg-base-200/50 rounded-xl">
+                          <p class="text-lg font-bold text-primary">
+                            {{ selectedConversation.messages?.length || 0 }}
+                          </p>
+                          <p class="text-[10px] text-base-content/50 uppercase font-medium">
+                            Messages
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>

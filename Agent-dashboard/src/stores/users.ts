@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 import { usersApi } from '@/api'
 import type { User, CreateUser, UpdateUser } from '@/api'
+
+dayjs.extend(utc)
 
 export const useUsersStore = defineStore('users', () => {
   // State
@@ -62,7 +66,17 @@ export const useUsersStore = defineStore('users', () => {
     error.value = null
     successMessage.value = null
     try {
-      await usersApi.update(id, data)
+      // Clean empty strings to undefined to prevent API validation errors
+      const cleanedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [key, value === '' ? undefined : value]),
+      ) as UpdateUser
+
+      // Convert dateOfBirth to UTC ISO string for PostgreSQL compatibility
+      if (cleanedData.dateOfBirth) {
+        cleanedData.dateOfBirth = dayjs(cleanedData.dateOfBirth).utc().toISOString()
+      }
+
+      await usersApi.update(id, cleanedData)
       const index = users.value.findIndex((u) => u.id === id)
       if (index !== -1 && users.value[index]) {
         const existingUser = users.value[index]!

@@ -13,6 +13,7 @@ export const useConversationsStore = defineStore('conversations', () => {
   const totalPages = ref(0)
   const searchQuery = ref('')
   const isLoading = ref(false)
+  const isLoadingDetail = ref(false)
   const isExporting = ref(false)
   const error = ref<string | null>(null)
   const successMessage = ref<string | null>(null)
@@ -178,7 +179,7 @@ export const useConversationsStore = defineStore('conversations', () => {
   }
 
   async function fetchConversationById(id: string) {
-    isLoading.value = true
+    isLoadingDetail.value = true
     error.value = null
     try {
       // Try chatApi first for User (ChatView)
@@ -196,7 +197,7 @@ export const useConversationsStore = defineStore('conversations', () => {
       error.value = e.response?.data?.message || e.message || 'Failed to fetch conversation'
       return null
     } finally {
-      isLoading.value = false
+      isLoadingDetail.value = false
     }
   }
 
@@ -321,6 +322,7 @@ export const useConversationsStore = defineStore('conversations', () => {
     pageSize,
     totalPages,
     isLoading,
+    isLoadingDetail,
     isExporting,
     error,
     successMessage,

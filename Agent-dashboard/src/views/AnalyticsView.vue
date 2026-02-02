@@ -303,7 +303,7 @@ async function changeQuestionLimit(limit: number) {
     </div>
 
     <!-- Alerts -->
-    <div v-if="analyticsStore.error" class="alert alert-error text-sm py-3 rounded-xl shadow-sm">
+    <div v-if="analyticsStore.error" class="alert alert-soft alert-error text-sm py-3 rounded-xl">
       <AppIcon name="exclamation" class="w-5 h-5" />
       <span>{{ analyticsStore.error }}</span>
       <button class="btn btn-ghost btn-xs" @click="analyticsStore.clearError()">

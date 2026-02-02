@@ -115,13 +115,13 @@ function togglePermission(permId: string) {
     </div>
 
     <!-- Feedback Alerts -->
-    <div v-if="errorMessage" class="alert alert-error text-sm py-3">
+    <div v-if="errorMessage" class="alert alert-soft alert-error text-sm py-3 rounded-xl">
       <span>{{ errorMessage }}</span>
       <button class="btn btn-ghost btn-xs" @click="errorMessage = ''">
         {{ t('actions.dismiss') }}
       </button>
     </div>
-    <div v-if="successMessage" class="alert alert-success text-sm py-3">
+    <div v-if="successMessage" class="alert alert-soft alert-success text-sm py-3 rounded-xl">
       <span>{{ successMessage }}</span>
     </div>
 

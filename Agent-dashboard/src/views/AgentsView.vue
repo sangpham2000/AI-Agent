@@ -90,16 +90,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-5">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-base-content">AI Agents</h1>
-        <p class="text-base-content/60 text-sm mt-1">
+        <h1 class="text-xl font-semibold">AI Agents</h1>
+        <p class="text-sm text-base-content/50 mt-0.5">
           Manage your AI assistants and their personalities.
         </p>
       </div>
-      <button class="btn btn-primary gap-2 shadow-lg shadow-primary/20" @click="openCreateModal">
+      <button class="btn btn-primary btn-sm gap-2 rounded-lg" @click="openCreateModal">
         <AppIcon name="plus" class="w-4 h-4" />
         New Agent
       </button>
@@ -137,7 +137,7 @@ onMounted(() => {
       <div
         v-for="agent in agents"
         :key="agent.id"
-        class="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200 border border-base-200 group relative overflow-hidden"
+        class="card bg-base-100 border border-base-200 rounded-2xl group relative overflow-hidden hover:border-base-300 transition-all duration-200"
       >
         <!-- Card Body -->
         <div class="card-body p-5">
