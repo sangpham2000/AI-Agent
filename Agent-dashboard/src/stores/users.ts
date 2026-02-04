@@ -1,11 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
 import { usersApi } from '@/api'
 import type { User, CreateUser, UpdateUser } from '@/api'
-
-dayjs.extend(utc)
+import { toUtcIsoString } from '@/utils/format'
 
 export const useUsersStore = defineStore('users', () => {
   // State
@@ -73,7 +70,7 @@ export const useUsersStore = defineStore('users', () => {
 
       // Convert dateOfBirth to UTC ISO string for PostgreSQL compatibility
       if (cleanedData.dateOfBirth) {
-        cleanedData.dateOfBirth = dayjs(cleanedData.dateOfBirth).utc().toISOString()
+        cleanedData.dateOfBirth = toUtcIsoString(cleanedData.dateOfBirth)
       }
 
       await usersApi.update(id, cleanedData)

@@ -5,6 +5,7 @@ import { useUsersStore } from '@/stores/users'
 import { rolesApi } from '@/api/users'
 import type { User, CreateUser, UpdateUser, Role } from '@/api/types'
 import AppIcon from '@/components/ui/AppIcon.vue'
+import { toDateInputFormat } from '@/utils/format'
 
 const { t } = useI18n()
 const usersStore = useUsersStore()
@@ -102,7 +103,7 @@ function openEditModal(user: User) {
     firstName: user.firstName,
     lastName: user.lastName,
     phoneNumber: user.phoneNumber || '',
-    dateOfBirth: user.dateOfBirth || '',
+    dateOfBirth: toDateInputFormat(user.dateOfBirth),
     avatarUrl: user.avatarUrl || '',
     isActive: user.isActive,
   }

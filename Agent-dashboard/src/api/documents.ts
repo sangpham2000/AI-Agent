@@ -47,9 +47,6 @@ export const documentsApi = {
   /**
    * Delete a document
    */
-  /**
-   * Delete a document
-   */
   delete: (id: string) => apiClient.delete(`/documents/${id}`),
 
   /**
