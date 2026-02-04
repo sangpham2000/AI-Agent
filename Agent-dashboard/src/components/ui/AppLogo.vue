@@ -1,14 +1,3 @@
 <template>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    v-bind="$attrs"
-  >
-    <path d="M13 10V3L4 14h7v7l9-11h-7z" />
-  </svg>
+  <img src="/logo.png" alt="Logo" class="object-contain rounded-xl" v-bind="$attrs" />
 </template>

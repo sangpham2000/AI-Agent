@@ -149,7 +149,7 @@ const handleLogin = () => {
                       <div
                         class="bg-base-200 p-3 rounded-2xl rounded-tl-none max-w-[90%] text-sm shadow-sm space-y-2"
                       >
-                        <div class="font-semibold text-xs opacity-50">AI Agent</div>
+                        <div class="font-semibold text-xs opacity-50">Sang Agent</div>
                         <p>Here is the summary for Q3:</p>
                         <div
                           class="h-24 bg-base-100 rounded-lg border border-base-300/50 flex items-end justify-around p-2 gap-1"

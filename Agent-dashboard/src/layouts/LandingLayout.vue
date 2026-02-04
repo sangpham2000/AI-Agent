@@ -81,15 +81,13 @@ const scrollToSection = (id: string) => {
       <div class="container mx-auto px-6 h-16 flex items-center justify-between">
         <!-- Logo -->
         <RouterLink to="/" class="flex items-center gap-2 group">
-          <div
-            class="w-8 h-8 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all duration-300"
-          >
-            <AppLogo class="w-5 h-5 text-white" />
+          <div class="w-10 h-10 flex items-center justify-center">
+            <AppLogo class="w-full h-full" />
           </div>
           <span
             class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/70"
           >
-            AI Agent
+            Sang Agent
           </span>
         </RouterLink>
 
@@ -206,12 +204,10 @@ const scrollToSection = (id: string) => {
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-12">
           <div class="col-span-2 lg:col-span-2">
             <div class="flex items-center gap-2 mb-4">
-              <div
-                class="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center text-primary"
-              >
-                <AppIcon name="sparkles" class="w-4 h-4" />
+              <div class="w-8 h-8 flex items-center justify-center">
+                <AppLogo class="w-full h-full" />
               </div>
-              <span class="font-bold text-lg">AI Agent</span>
+              <span class="font-bold text-lg">Sang Agent</span>
             </div>
             <p class="text-base-content/60 text-sm max-w-xs leading-relaxed">
               Empowering organizations with intelligent, scalable, and secure AI agents. The future

@@ -89,7 +89,7 @@ public static class DependencyInjection
         }
         
         // Telegram Bot Service (Legacy/Duplicate? Commenting out to ensure we use the new TelegramService)
-        // services.AddHttpClient<ITelegramBotService, TelegramBotService>();
+         services.AddHttpClient<ITelegramBotService, TelegramBotService>();
 
         return services;
     }

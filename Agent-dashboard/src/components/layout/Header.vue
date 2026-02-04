@@ -164,21 +164,29 @@ function toggleTheme() {
       <div class="dropdown dropdown-end ml-1">
         <button
           tabindex="0"
-          class="btn btn-ghost btn-sm pl-1 pr-2 gap-2 rounded-full border border-transparent hover:border-base-200 hover:bg-base-100"
+          class="group flex items-center gap-2 p-1 pr-1 sm:pr-3 rounded-full border border-base-200 hover:border-base-300 hover:bg-base-100 transition-all duration-200"
         >
           <div class="avatar">
-            <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-primary to-secondary p-0.5">
+            <div
+              class="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary p-[2px] shadow-sm group-hover:shadow-md transition-shadow"
+            >
               <div class="w-full h-full rounded-full bg-base-100 flex items-center justify-center">
-                <span class="text-[10px] font-bold text-primary">
+                <span class="text-xs font-bold text-primary">
                   {{ authStore.userName?.[0]?.toUpperCase() || 'A' }}
                 </span>
               </div>
             </div>
           </div>
-          <span class="hidden sm:block text-xs font-semibold max-w-[100px] truncate leading-none">
-            {{ authStore.userName || 'Admin' }}
-          </span>
-          <AppIcon name="chevron-down" class="w-3 h-3 opacity-50 hidden sm:block" />
+          <div class="hidden sm:flex flex-col items-start pr-1">
+            <span class="text-xs font-bold text-base-content leading-tight max-w-[100px] truncate">
+              {{ authStore.userName || 'Admin' }}
+            </span>
+            <span class="text-[10px] text-base-content/50 leading-tight">Pro Plan</span>
+          </div>
+          <AppIcon
+            name="chevron-down"
+            class="w-3 h-3 text-base-content/40 group-hover:text-base-content/70 hidden sm:block transition-colors"
+          />
         </button>
         <ul
           tabindex="0"

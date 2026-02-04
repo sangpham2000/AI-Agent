@@ -39,7 +39,7 @@ const { t } = useI18n()
           class="card bg-base-100 backdrop-blur-xl border border-primary p-6 shadow-xl relative scale-105 z-10"
         >
           <div
-            class="absolute top-0 right-0 bg-primary text-white text-xs px-3 py-1 rounded-bl-xl font-bold"
+            class="absolute top-0 right-0 bg-primary text-white text-xs px-3 py-1 rounded-bl-xl rounded-tr-xl font-bold"
           >
             {{ t('pricingPage.pro.tag') }}
           </div>

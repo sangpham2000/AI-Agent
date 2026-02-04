@@ -1,7 +1,7 @@
 export default {
   // Common
   app: {
-    name: 'AI Agent',
+    name: 'Sang Agent',
     title: 'Educational AI Assistant',
   },
 

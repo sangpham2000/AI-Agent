@@ -219,7 +219,14 @@ const systemMetrics = computed(() => [
         </h3>
         <div class="grid grid-cols-3 gap-4">
           <div v-for="(insight, i) in quickInsights" :key="i">
-            <p class="text-2xl font-bold" :class="insight.positive ? 'text-success' : ''">
+            <p
+              class="text-3xl lg:text-4xl font-extrabold tracking-tight mt-2"
+              :class="
+                insight.positive
+                  ? 'text-success'
+                  : 'bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/70'
+              "
+            >
               {{ insight.value }}
             </p>
             <p class="text-[11px] text-base-content/50 mt-0.5">{{ insight.sublabel }}</p>
@@ -233,7 +240,9 @@ const systemMetrics = computed(() => [
           <AppIcon name="chip" class="w-3.5 h-3.5" />
           {{ t('dashboard.systemTokenConsumption') }}
         </p>
-        <p class="text-2xl font-bold">
+        <p
+          class="text-3xl font-extrabold tracking-tight mt-2 bg-clip-text text-transparent bg-gradient-to-br from-primary to-secondary"
+        >
           {{ formatCompact(analyticsStore.totalTokensUsedThisMonth || 0) }}
         </p>
         <p class="text-[11px] text-base-content/50">{{ t('dashboard.thisMonth') }}</p>
@@ -245,7 +254,9 @@ const systemMetrics = computed(() => [
           <AppIcon name="user-group" class="w-3.5 h-3.5" />
           {{ t('dashboard.activeUsers') }}
         </p>
-        <p class="text-2xl font-bold">
+        <p
+          class="text-3xl font-extrabold tracking-tight mt-2 bg-clip-text text-transparent bg-gradient-to-br from-info to-accent"
+        >
           {{ formatCompact(analyticsStore.activeUsers || 0) }}
         </p>
         <p class="text-[11px] text-base-content/50">
@@ -282,7 +293,9 @@ const systemMetrics = computed(() => [
           <AppIcon name="chat" class="w-3.5 h-3.5" />
           {{ t('analytics.avgPerDay', { count: averageMessagesPerDay }) }}
         </p>
-        <p class="text-2xl font-bold">
+        <p
+          class="text-3xl font-extrabold tracking-tight mt-2 bg-clip-text text-transparent bg-gradient-to-br from-warning to-error"
+        >
           {{ formatCompact(averageMessagesPerDay) }}
         </p>
         <p class="text-[11px] text-base-content/50">
@@ -328,7 +341,11 @@ const systemMetrics = computed(() => [
         </div>
 
         <div class="flex items-baseline gap-2 mb-6">
-          <p class="text-3xl font-bold">{{ formatCompact(totalMessagesThisWeek) }}</p>
+          <p
+            class="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent"
+          >
+            {{ formatCompact(totalMessagesThisWeek) }}
+          </p>
           <span
             class="badge badge-sm border-0"
             :class="

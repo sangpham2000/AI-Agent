@@ -118,10 +118,10 @@ const icons: Record<string, string> = {
     <!-- Logo -->
     <div class="h-16 flex items-center px-4 border-b border-base-200 flex-shrink-0">
       <RouterLink to="/" class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-          <AppLogo class="h-4 w-4 text-primary-content" />
+        <div class="w-8 h-8 flex items-center justify-center flex-shrink-0">
+          <AppLogo class="h-8 w-8" />
         </div>
-        <span v-if="!isCollapsed" class="font-semibold text-base">SA AI Dashboard</span>
+        <span v-if="!isCollapsed" class="font-semibold text-base">SA Dashboard</span>
       </RouterLink>
     </div>
 

@@ -405,7 +405,7 @@ function renderMessageContent(content: string) {
               >
                 <div class="flex items-center gap-2 px-1">
                   <span class="text-xs font-medium text-base-content">
-                    {{ msg.role === 'user' ? 'You' : 'AI Assistant' }}
+                    {{ msg.role === 'user' ? 'You' : '' }}
                   </span>
                 </div>
 

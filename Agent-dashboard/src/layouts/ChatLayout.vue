@@ -198,12 +198,10 @@ async function handleClearAllHistory() {
         class="h-14 flex items-center justify-between px-3 sticky top-0 bg-base-100/50 backdrop-blur-md z-20 border-b border-base-200/50"
       >
         <div class="flex items-center gap-2 font-bold text-base tracking-tight text-base-content">
-          <div
-            class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
-          >
-            <AppLogo class="w-5 h-5" />
+          <div class="w-8 h-8 flex items-center justify-center text-primary">
+            <AppLogo class="w-8 h-8" />
           </div>
-          <span>AI Agent</span>
+          <span>Sang Agent</span>
         </div>
         <button
           class="btn btn-ghost btn-xs btn-square opacity-60 hover:opacity-100 transition-opacity"

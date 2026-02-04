@@ -8,7 +8,7 @@ const { t } = useI18n()
     <div class="container mx-auto px-6 relative z-10">
       <div class="text-center max-w-3xl mx-auto mb-16">
         <h1 class="text-4xl md:text-5xl font-bold mb-6">
-          {{ t('solutionsPage.title') }}
+          {{ t('solutionsPage.title') }}&nbsp;
           <span class="text-secondary">{{ t('solutionsPage.highlight') }}</span>
         </h1>
         <p class="text-lg text-base-content/70">
